@@ -85,6 +85,22 @@ pub const Game = struct {
         self.current_block.render(renderer);
     }
 
+    pub fn tick(self: *Self) void {
+        self.current_block.translate(0, 1);
+    }
+
+    pub fn moveDown(self: *Self) void {
+        self.current_block.translate(0, 1);
+    }
+
+    pub fn moveLeft(self: *Self) void {
+        self.current_block.translate(-1, 0);
+    }
+
+    pub fn moveRight(self: *Self) void {
+        self.current_block.translate(1, 0);
+    }
+
     fn maxWidth(self: *Self) u32 {
         return self.cells.len - 1;
     }

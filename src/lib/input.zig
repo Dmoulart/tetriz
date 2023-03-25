@@ -18,7 +18,7 @@ pub const Input = struct {
         }
     }
 
-    pub fn onKeyPressed(keyName: [*c]const u8, comptime function: fn () void) void {
+    pub fn onKeyPressed(keyName: [*c]const u8, comptime function: anytype) void {
         const key = c.SDL_GetKeyName(event.key.keysym.sym);
         if (Input.isKeyPressed(keyName.*, key.*)) {
             function();

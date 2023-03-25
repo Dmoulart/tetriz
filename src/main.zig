@@ -35,15 +35,19 @@ pub fn main() anyerror!void {
     _ = try game.createPlayerBlock();
     // block.update(&game.cells);
 
+    // Input.onKeyPressed("ArrowLeft", Game.moveRight);
+
     while (!game_over) {
         Input.listen();
+
         renderer.clear();
 
+        game.tick();
         game.render(renderer);
 
         renderer.render();
 
-        c.SDL_Delay(16);
+        c.SDL_Delay(300);
     }
 }
 

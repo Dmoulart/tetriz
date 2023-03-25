@@ -48,6 +48,13 @@ pub const Block = struct {
         }
     }
 
+    pub fn translate(self: *Self, x: u32, y: u32) void {
+        self.x += x;
+        self.y += y;
+
+        self.syncCells();
+    }
+
     fn createCells(self: *Self) !void {
         self.cells = undefined;
         switch (self.type) {
