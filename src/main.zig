@@ -30,7 +30,10 @@ pub fn main() anyerror!void {
 
     const game = try Game.init(allocator);
 
-    game.addWalls();
+    game.setup();
+
+    var block = try game.createBlock();
+    block.update(&game.cells);
 
     while (!game_over) {
         Input.listen();
