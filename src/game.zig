@@ -5,23 +5,23 @@ const Renderer = @import("lib/renderer.zig").Renderer;
 
 const Conf = @import("conf.zig");
 
-pub const Cells = struct {
+pub const Game = struct {
     const Self = @This();
 
     allocator: *std.mem.Allocator,
-    list: [Conf.MAX_WIDTH][Conf.MAX_HEIGHT]Cell,
+    cells: [Conf.MAX_WIDTH][Conf.MAX_HEIGHT]Cell,
 
-    pub fn init(allocator: *std.mem.Allocator) !*Cells {
-        var cells = try allocator.create(Cells);
+    pub fn init(allocator: *std.mem.Allocator) !*Game {
+        var cells = try allocator.create(Game);
         return cells;
     }
 
-    pub fn createWalls(self: *Self) void {
+    pub fn addWalls(self: *Self) void {
         var x: u32 = 0;
         var y: u32 = 0;
 
-        const max_x = self.list.len;
-        const max_y = self.list[0].len;
+        const max_x = self.cells.len;
+        const max_y = self.cells[0].len;
 
         const begin_x = @divTrunc(max_x, 4);
         const end_x = @divTrunc(max_x, 4) * 3;
@@ -40,14 +40,14 @@ pub const Cells = struct {
                 const isBottomWall = y == end_y - 1 and x > begin_x and x < end_x - 1;
 
                 if (isLeftWall or isRightWall or isBottomWall) {
-                    self.list[x][y] = Cell{ .allocator = self.allocator, .x = x, .y = y };
+                    self.cells[x][y] = Cell{ .allocator = self.allocator, .x = x, .y = y };
                 }
             }
         }
     }
 
     pub fn render(self: *Self, renderer: *Renderer) void {
-        for (self.list) |col| {
+        for (self.cells) |col| {
             for (col) |colCell| {
                 var cell = colCell;
                 cell.render(renderer);

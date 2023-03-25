@@ -6,7 +6,7 @@ const c = @cImport({
 const Renderer = @import("lib/renderer.zig").Renderer;
 const Input = @import("lib/input.zig").Input;
 const Cell = @import("cell.zig").Cell;
-const Cells = @import("cells.zig").Cells;
+const Game = @import("game.zig").Game;
 
 const Conf = @import("conf.zig");
 
@@ -28,15 +28,15 @@ pub fn main() anyerror!void {
 
     var game_over = false;
 
-    const cells = try Cells.init(allocator);
+    const game = try Game.init(allocator);
 
-    cells.createWalls();
+    game.addWalls();
 
     while (!game_over) {
         Input.listen();
         renderer.clear();
 
-        cells.render(renderer);
+        game.render(renderer);
         renderer.render();
         c.SDL_Delay(16);
     }
