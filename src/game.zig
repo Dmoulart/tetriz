@@ -1,5 +1,10 @@
 const std = @import("std");
 const Cell = @import("cell.zig").Cell;
+
+const CELL_BLOCK = @import("cell.zig").CELL_BLOCK;
+const CELL_NONE = @import("cell.zig").CELL_NONE;
+const CELL_WALL = @import("cell.zig").CELL_WALL;
+
 const CellType = @import("cell.zig").CellType;
 const Vec = @import("cell.zig").Vec;
 const Block = @import("block.zig").Block;
@@ -23,7 +28,7 @@ pub const Game = struct {
         return game;
     }
 
-    pub fn createBlock(self: *Self) !*Block {
+    pub fn createPlayerBlock(self: *Self) !*Block {
         self.current_block = try Block.init(self.allocator);
 
         const max_x = self.maxWidth();
@@ -61,9 +66,9 @@ pub const Game = struct {
                 const isBottomWall = y == end_y and x >= begin_x and x <= end_x;
 
                 if (isLeftWall or isRightWall or isBottomWall) {
-                    self.cells[x][y] = Cell{ .allocator = self.allocator, .x = x, .y = y, .type = CellType.Wall };
+                    self.cells[x][y] = Cell{ .allocator = self.allocator, .x = x, .y = y, .type = CELL_WALL };
                 } else {
-                    self.cells[x][y] = Cell{ .allocator = self.allocator, .x = x, .y = y, .type = CellType.None };
+                    self.cells[x][y] = Cell{ .allocator = self.allocator, .x = x, .y = y, .type = CELL_NONE };
                 }
             }
         }
@@ -76,6 +81,8 @@ pub const Game = struct {
                 cell.render(renderer);
             }
         }
+
+        self.current_block.render(renderer);
     }
 
     fn maxWidth(self: *Self) u32 {

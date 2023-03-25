@@ -32,8 +32,8 @@ pub fn main() anyerror!void {
 
     game.setup();
 
-    var block = try game.createBlock();
-    block.update(&game.cells);
+    _ = try game.createPlayerBlock();
+    // block.update(&game.cells);
 
     while (!game_over) {
         Input.listen();
