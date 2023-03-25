@@ -37,7 +37,9 @@ pub fn main() anyerror!void {
         renderer.clear();
 
         game.render(renderer);
+
         renderer.render();
+
         c.SDL_Delay(16);
     }
 }

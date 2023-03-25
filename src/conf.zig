@@ -1,6 +1,6 @@
 const std = @import("std");
 
-pub const CELL_SIZE = 20;
+pub const CELL_SIZE = 30;
 
 pub const SCREEN_WIDTH = 800;
 pub const SCREEN_HEIGHT = 1000;

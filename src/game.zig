@@ -33,11 +33,11 @@ pub const Game = struct {
             y = 0;
 
             while (y < max_y) : (y += 1) {
-                const isLeftWall = x == begin_x and y < end_y and y > begin_y;
+                const isLeftWall = x == begin_x and y <= end_y and y >= begin_y;
 
-                const isRightWall = x == end_x - 1 and y < end_y and y > begin_y;
+                const isRightWall = x == end_x and y <= end_y and y >= begin_y;
 
-                const isBottomWall = y == end_y - 1 and x > begin_x and x < end_x - 1;
+                const isBottomWall = y == end_y and x >= begin_x and x <= end_x;
 
                 if (isLeftWall or isRightWall or isBottomWall) {
                     self.cells[x][y] = Cell{ .allocator = self.allocator, .x = x, .y = y };
