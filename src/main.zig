@@ -5,20 +5,14 @@ const c = @cImport({
 
 const Renderer = @import("lib/renderer.zig").Renderer;
 const Input = @import("lib/input.zig").Input;
+const Cell = @import("cell.zig").Cell;
+const Cells = @import("cells.zig").Cells;
+
+const Conf = @import("conf.zig");
 
 const os = std.os;
 
-const CELL_SIZE = 20;
-
 var speed: u8 = 100;
-
-const ErrorSet = error{SDLError};
-
-pub const SCREEN_WIDTH = 600;
-pub const SCREEN_HEIGHT = 600;
-
-const MAX_HEIGHT = @divTrunc(SCREEN_HEIGHT, CELL_SIZE);
-const MAX_WIDTH = @divTrunc(SCREEN_WIDTH, CELL_SIZE);
 
 var RNG = std.rand.DefaultPrng.init(0);
 var random = std.rand.DefaultPrng.random(&RNG);
@@ -27,14 +21,22 @@ pub fn main() anyerror!void {
     var arena: std.heap.ArenaAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer arena.deinit();
 
-    var renderer = try Renderer.init(.{ .allocator = &arena.child_allocator, .title = "Tetriz", .x = 0, .y = 0, .w = 600, .h = 400, .flags = c.SDL_WINDOW_SHOWN });
+    const allocator = &arena.child_allocator;
+
+    var renderer = try Renderer.init(.{ .allocator = allocator, .title = "Tetriz", .x = 0, .y = 0, .w = Conf.SCREEN_WIDTH, .h = Conf.SCREEN_HEIGHT, .flags = c.SDL_WINDOW_SHOWN });
     defer renderer.deinit();
 
     var game_over = false;
 
+    const cells = try Cells.init(allocator);
+
+    cells.createWalls();
+
     while (!game_over) {
         Input.listen();
+        renderer.clear();
 
+        cells.render(renderer);
         renderer.render();
         c.SDL_Delay(16);
     }

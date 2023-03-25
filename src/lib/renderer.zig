@@ -12,6 +12,7 @@ pub const Renderer = struct {
 
     sdl_renderer: *c.SDL_Renderer = undefined,
     sdl_window: *c.SDL_Window = undefined,
+    sdl_rect: c.SDL_Rect = undefined,
 
     pub fn init(options: RendererOptions) !*Renderer {
         var renderer = try options.allocator.create(Renderer);
@@ -24,11 +25,29 @@ pub const Renderer = struct {
 
         renderer.sdl_renderer = c.SDL_CreateRenderer(renderer.sdl_window, 0, 0) orelse unreachable;
 
+        renderer.sdl_rect = c.SDL_Rect{ .x = @intCast(c_int, 0), .y = @intCast(c_int, 0), .w = 10, .h = 10 };
+
         return renderer;
     }
 
-    pub fn render(self: *Self) void {
+    pub fn drawRect(self: *Self, x: u32, y: u32, w: u32, h: u32, r: u8, g: u8, b: u8, a: u8) void {
+        _ = c.SDL_SetRenderDrawColor(self.sdl_renderer, r, g, b, a);
+
+        self.sdl_rect.w = @intCast(c_int, w);
+        self.sdl_rect.h = @intCast(c_int, h);
+
+        self.sdl_rect.x = @intCast(c_int, x);
+        self.sdl_rect.y = @intCast(c_int, y);
+
+        _ = c.SDL_RenderDrawRect(self.sdl_renderer, &self.sdl_rect);
+    }
+
+    pub fn clear(self: *Self) void {
+        _ = c.SDL_SetRenderDrawColor(self.sdl_renderer, 0, 0, 0, 255);
         _ = c.SDL_RenderClear(self.sdl_renderer);
+    }
+
+    pub fn render(self: *Self) void {
         _ = c.SDL_RenderPresent(self.sdl_renderer);
     }
 

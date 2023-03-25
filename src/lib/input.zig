@@ -20,12 +20,12 @@ pub const Input = struct {
 
     pub fn onKeyPressed(keyName: [*c]const u8, comptime function: fn () void) void {
         const key = c.SDL_GetKeyName(event.key.keysym.sym);
-        if (Input.isKeyPressed(keyName, key)) {
+        if (Input.isKeyPressed(keyName.*, key.*)) {
             function();
         }
     }
 
-    fn isKeyPressed(pressedKeyName: [*c]const u8, keyName: [*c]const u8) bool {
-        return std.mem.eql([*c]const u8, pressedKeyName, keyName);
+    fn isKeyPressed(pressedKeyName: []const u8, keyName: []const u8) bool {
+        return std.mem.eql(u8, pressedKeyName, keyName);
     }
 };
