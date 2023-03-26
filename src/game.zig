@@ -21,14 +21,21 @@ pub const Cells = [Conf.MAX_WIDTH][Conf.MAX_HEIGHT]Cell;
 pub const Game = struct {
     const Self = @This();
 
+    const TICK_RATE = 30;
+
+    loop_counter: u8 = 0,
+
     allocator: *std.mem.Allocator,
     cells: Cells,
 
     current_block: *Block,
 
+    renderer: *Renderer,
+
     pub fn init(allocator: *std.mem.Allocator) !*Game {
         var game = try allocator.create(Game);
         game.allocator = allocator;
+        game.loop_counter = 0;
         return game;
     }
 
@@ -46,7 +53,78 @@ pub const Game = struct {
         return self.current_block;
     }
 
+    pub fn setRenderer(self: *Self, renderer: *Renderer) void {
+        self.renderer = renderer;
+    }
+
     pub fn setup(self: *Self) void {
+        self.addWalls();
+    }
+
+    pub fn render(self: *Self, renderer: *Renderer) void {
+        for (self.cells) |col| {
+            for (col) |colCell| {
+                var cell = colCell;
+                cell.render(renderer);
+            }
+        }
+
+        self.current_block.render(renderer);
+    }
+
+    pub fn tick(self: *Self) void {
+        self.current_block.translate(0, 1);
+    }
+
+    pub fn update(self: *Self) void {
+        self.renderer.clear();
+
+        if (self.loop_counter == TICK_RATE) {
+            self.tick();
+            self.loop_counter = 0;
+        }
+
+        _ = Input.listen();
+
+        self.processInput(Input.getPressedKey());
+
+        self.render(self.renderer);
+
+        self.renderer.render();
+
+        c.SDL_Delay(16);
+
+        self.loop_counter += 1;
+    }
+
+    pub fn processInput(self: *Self, sym: c_int) void {
+        switch (sym) {
+            c.SDLK_LEFT => {
+                self.moveLeft();
+            },
+            c.SDLK_RIGHT => {
+                self.moveRight();
+            },
+            c.SDLK_DOWN => {
+                self.moveDown();
+            },
+            else => {},
+        }
+    }
+
+    pub fn moveDown(self: *Self) void {
+        self.current_block.translate(0, 1);
+    }
+
+    pub fn moveLeft(self: *Self) void {
+        self.current_block.translate(-1, 0);
+    }
+
+    pub fn moveRight(self: *Self) void {
+        self.current_block.translate(1, 0);
+    }
+
+    fn addWalls(self: *Self) void {
         var x: i32 = 0;
         var y: i32 = 0;
 
@@ -79,48 +157,6 @@ pub const Game = struct {
                 }
             }
         }
-    }
-
-    pub fn render(self: *Self, renderer: *Renderer) void {
-        for (self.cells) |col| {
-            for (col) |colCell| {
-                var cell = colCell;
-                cell.render(renderer);
-            }
-        }
-
-        self.current_block.render(renderer);
-    }
-
-    pub fn tick(self: *Self) void {
-        self.current_block.translate(0, 1);
-    }
-
-    pub fn processInput(self: *Self, sym: c_int) void {
-        switch (sym) {
-            c.SDLK_LEFT => {
-                self.moveLeft();
-            },
-            c.SDLK_RIGHT => {
-                self.moveRight();
-            },
-            c.SDLK_DOWN => {
-                self.moveDown();
-            },
-            else => {},
-        }
-    }
-
-    pub fn moveDown(self: *Self) void {
-        self.current_block.translate(0, 1);
-    }
-
-    pub fn moveLeft(self: *Self) void {
-        self.current_block.translate(-1, 0);
-    }
-
-    pub fn moveRight(self: *Self) void {
-        self.current_block.translate(1, 0);
     }
 
     fn maxWidth(self: *Self) i32 {

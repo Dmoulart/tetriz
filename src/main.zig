@@ -30,24 +30,13 @@ pub fn main() anyerror!void {
 
     const game = try Game.init(allocator);
 
+    game.setRenderer(renderer);
     game.setup();
 
     _ = try game.createPlayerBlock();
 
     while (!game_over) {
-        renderer.clear();
-
-        game.tick();
-
-        _ = Input.listen();
-
-        game.processInput(Input.getPressedKey());
-
-        game.render(renderer);
-
-        renderer.render();
-
-        c.SDL_Delay(300);
+        game.update();
     }
 }
 
