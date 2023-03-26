@@ -1,1 +1,1 @@
-zig build && ./zig-out/bin/zig-snake
+zig build && ./zig-out/bin/tetriz

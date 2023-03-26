@@ -1,14 +1,18 @@
 const std = @import("std");
-const Cell = @import("cell.zig").Cell;
+const c = @cImport({
+    @cInclude("SDL2/SDL.h");
+});
 
+const Renderer = @import("lib/renderer.zig").Renderer;
+const Input = @import("lib/input.zig").Input;
+
+const Cell = @import("cell.zig").Cell;
+const CellType = @import("cell.zig").CellType;
 const CELL_BLOCK = @import("cell.zig").CELL_BLOCK;
 const CELL_NONE = @import("cell.zig").CELL_NONE;
 const CELL_WALL = @import("cell.zig").CELL_WALL;
 
-const CellType = @import("cell.zig").CellType;
-const Vec = @import("cell.zig").Vec;
 const Block = @import("block.zig").Block;
-const Renderer = @import("lib/renderer.zig").Renderer;
 
 const Conf = @import("conf.zig");
 
@@ -43,8 +47,8 @@ pub const Game = struct {
     }
 
     pub fn setup(self: *Self) void {
-        var x: u32 = 0;
-        var y: u32 = 0;
+        var x: i32 = 0;
+        var y: i32 = 0;
 
         const max_x = self.maxWidth();
         const max_y = self.maxHeight();
@@ -65,10 +69,13 @@ pub const Game = struct {
 
                 const isBottomWall = y == end_y and x >= begin_x and x <= end_x;
 
+                var x_index = @intCast(usize, x);
+                var y_index = @intCast(usize, y);
+
                 if (isLeftWall or isRightWall or isBottomWall) {
-                    self.cells[x][y] = Cell{ .allocator = self.allocator, .x = x, .y = y, .type = CELL_WALL };
+                    self.cells[x_index][y_index] = Cell{ .allocator = self.allocator, .x = @as(i32, x), .y = @as(i32, y), .type = CELL_WALL };
                 } else {
-                    self.cells[x][y] = Cell{ .allocator = self.allocator, .x = x, .y = y, .type = CELL_NONE };
+                    self.cells[x_index][y_index] = Cell{ .allocator = self.allocator, .x = @as(i32, x), .y = @as(i32, y), .type = CELL_NONE };
                 }
             }
         }
@@ -89,6 +96,21 @@ pub const Game = struct {
         self.current_block.translate(0, 1);
     }
 
+    pub fn processInput(self: *Self, sym: c_int) void {
+        switch (sym) {
+            c.SDLK_LEFT => {
+                self.moveLeft();
+            },
+            c.SDLK_RIGHT => {
+                self.moveRight();
+            },
+            c.SDLK_DOWN => {
+                self.moveDown();
+            },
+            else => {},
+        }
+    }
+
     pub fn moveDown(self: *Self) void {
         self.current_block.translate(0, 1);
     }
@@ -101,11 +123,11 @@ pub const Game = struct {
         self.current_block.translate(1, 0);
     }
 
-    fn maxWidth(self: *Self) u32 {
+    fn maxWidth(self: *Self) i32 {
         return self.cells.len - 1;
     }
 
-    fn maxHeight(self: *Self) u32 {
+    fn maxHeight(self: *Self) i32 {
         return self.cells[0].len - 1;
     }
 };

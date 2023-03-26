@@ -33,16 +33,16 @@ pub fn main() anyerror!void {
     game.setup();
 
     _ = try game.createPlayerBlock();
-    // block.update(&game.cells);
-
-    // Input.onKeyPressed("ArrowLeft", Game.moveRight);
 
     while (!game_over) {
-        Input.listen();
-
         renderer.clear();
 
         game.tick();
+
+        _ = Input.listen();
+
+        game.processInput(Input.getPressedKey());
+
         game.render(renderer);
 
         renderer.render();

@@ -30,7 +30,7 @@ pub const Renderer = struct {
         return renderer;
     }
 
-    pub fn drawRect(self: *Self, x: u32, y: u32, w: u32, h: u32, r: u8, g: u8, b: u8, a: u8) void {
+    pub fn drawRect(self: *Self, x: i32, y: i32, w: i32, h: i32, r: u8, g: u8, b: u8, a: u8) void {
         _ = c.SDL_SetRenderDrawColor(self.sdl_renderer, r, g, b, a);
 
         self.sdl_rect.w = @intCast(c_int, w);

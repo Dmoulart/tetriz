@@ -6,26 +6,27 @@ const c = @cImport({
 pub const Input = struct {
     var event: c.SDL_Event = undefined;
 
-    pub fn listen() void {
+    pub fn listen() *c.SDL_Event {
         while (c.SDL_PollEvent(&event) != 0) {
             switch (event.type) {
-                c.SDL_KEYDOWN => {},
+                c.SDL_KEYDOWN => {
+                    return &event;
+                },
                 c.SDL_QUIT => {
                     c.SDL_Quit();
                 },
                 else => {},
             }
         }
+        return &event;
     }
 
-    pub fn onKeyPressed(keyName: [*c]const u8, comptime function: anytype) void {
-        const key = c.SDL_GetKeyName(event.key.keysym.sym);
-        if (Input.isKeyPressed(keyName.*, key.*)) {
-            function();
-        }
+    pub fn keyPressed(keycode: c_int) bool {
+        var sym = &event.key.keysym.sym;
+        return sym.* == keycode;
     }
 
-    fn isKeyPressed(pressedKeyName: []const u8, keyName: []const u8) bool {
-        return std.mem.eql(u8, pressedKeyName, keyName);
+    pub fn getPressedKey() i32 {
+        return event.key.keysym.sym;
     }
 };

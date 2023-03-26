@@ -2,8 +2,6 @@ const std = @import("std");
 const Renderer = @import("lib/renderer.zig").Renderer;
 const Conf = @import("conf.zig");
 
-pub const Vec = struct { x: u32 = 0, y: u32 = 0 };
-
 pub const CellFlag = enum(u32) { None = 0, Wall = 1 << 0, Block = 1 << 1 };
 
 pub const CELL_NONE = 0;
@@ -14,8 +12,8 @@ pub const Cell = struct {
     const Self = @This();
 
     allocator: *std.mem.Allocator,
-    x: u32,
-    y: u32,
+    x: i32,
+    y: i32,
 
     type: u32 = CELL_WALL,
 

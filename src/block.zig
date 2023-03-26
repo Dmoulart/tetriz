@@ -20,8 +20,8 @@ pub const Block = struct {
 
     cells: [4]*Cell,
 
-    x: u32,
-    y: u32,
+    x: i32,
+    y: i32,
 
     pub fn init(allocator: *std.mem.Allocator) !*Block {
         var block = try allocator.create(Block);
@@ -33,7 +33,7 @@ pub const Block = struct {
         return block;
     }
 
-    pub fn setPosition(self: *Self, x: u32, y: u32) void {
+    pub fn setPosition(self: *Self, x: i32, y: i32) void {
         self.x = x;
         self.y = y;
 
@@ -48,7 +48,7 @@ pub const Block = struct {
         }
     }
 
-    pub fn translate(self: *Self, x: u32, y: u32) void {
+    pub fn translate(self: *Self, x: i32, y: i32) void {
         self.x += x;
         self.y += y;
 
