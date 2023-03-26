@@ -1,8 +1,11 @@
 const std = @import("std");
 const Renderer = @import("lib/renderer.zig").Renderer;
+
 const Conf = @import("conf.zig");
 const Cells = @import("game.zig").Cells;
 const Cell = @import("cell.zig").Cell;
+
+const Shape = @import("shape.zig").Shape;
 
 const CELL_BLOCK = @import("cell.zig").CELL_BLOCK;
 const CELL_NONE = @import("cell.zig").CELL_NONE;
@@ -17,6 +20,8 @@ pub const Block = struct {
 
     allocator: *std.mem.Allocator,
     type: BlockType,
+
+    shape: Shape,
 
     cells: [4]*Cell,
 
@@ -55,8 +60,18 @@ pub const Block = struct {
         self.syncCells();
     }
 
+    pub fn intersects(self: *Self, x: i32, y: i32, cells: *Cells) void {
+        var newX = self.x + x;
+        var newY = self.y + y;
+
+        if ((cells[newX][newY].type & CELL_BLOCK) == CELL_BLOCK) {
+            return false;
+        }
+    }
+
     fn createCells(self: *Self) !void {
         self.cells = undefined;
+        // self.shape.createCells()
         switch (self.type) {
             .Square => {
                 self.cells = [_]*Cell{
