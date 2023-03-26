@@ -36,7 +36,7 @@ pub fn main() anyerror!void {
     _ = try game.createPlayerBlock();
 
     while (!game_over) {
-        game.update();
+        try game.update();
     }
 }
 

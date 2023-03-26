@@ -6,6 +6,7 @@ const Cells = @import("game.zig").Cells;
 const Cell = @import("cell.zig").Cell;
 
 const Shape = @import("shape.zig").Shape;
+const SquareShape = @import("shape.zig").SquareShape;
 
 const CELL_BLOCK = @import("cell.zig").CELL_BLOCK;
 const CELL_NONE = @import("cell.zig").CELL_NONE;
@@ -21,7 +22,7 @@ pub const Block = struct {
     allocator: *std.mem.Allocator,
     type: BlockType,
 
-    shape: Shape,
+    // shape: *Shape,
 
     cells: [4]*Cell,
 
@@ -34,6 +35,9 @@ pub const Block = struct {
         block.x = 0;
         block.y = 0;
         block.type = BlockType.Square;
+        // block.shape = try allocator.create(Shape);
+        // block.shape.square = try allocator.create(SquareShape);
+        // block.shape.createCells();
         try block.createCells();
         return block;
     }
@@ -60,18 +64,29 @@ pub const Block = struct {
         self.syncCells();
     }
 
-    pub fn intersects(self: *Self, x: i32, y: i32, cells: *Cells) void {
-        var newX = self.x + x;
-        var newY = self.y + y;
+    pub fn willIntersects(self: *Self, flag: u8, x: i32, y: i32, cells: *Cells) bool {
+        switch (self.type) {
+            .Square => {
+                for (self.cells) |cell| {
+                    if (cell.willIntersects(flag, x, y, cells)) {
+                        return true;
+                    }
+                }
+                return false;
+            },
+        }
+    }
 
-        if ((cells[newX][newY].type & CELL_BLOCK) == CELL_BLOCK) {
-            return false;
+    pub fn copyToCells(self: *Self, cells: *Cells) void {
+        for (self.cells) |cell| {
+            var x_index = @intCast(usize, cell.x);
+            var y_index = @intCast(usize, cell.y);
+            cells[x_index][y_index].type = cell.type;
         }
     }
 
     fn createCells(self: *Self) !void {
         self.cells = undefined;
-        // self.shape.createCells()
         switch (self.type) {
             .Square => {
                 self.cells = [_]*Cell{
@@ -108,19 +123,4 @@ pub const Block = struct {
             },
         }
     }
-
-    // pub fn update(self: *Self, cells: *Cells) void {
-    //     var x = self.x;
-    //     var y = self.y;
-
-    //     cells[x][y].type = CellType.Block;
-
-    //     switch (self.type) {
-    //         .Square => {
-    //             cells[x + 1][y].type = CellType.Block;
-    //             cells[x + 1][y + 1].type = CellType.Block;
-    //             cells[x][y + 1].type = CellType.Block;
-    //         },
-    //     }
-    // }
 };

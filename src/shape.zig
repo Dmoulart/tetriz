@@ -9,7 +9,7 @@ const CELL_NONE = @import("cell.zig").CELL_NONE;
 const CELL_WALL = @import("cell.zig").CELL_WALL;
 
 pub const Shape = union(enum) {
-    square: SquareShape,
+    square: *SquareShape,
 
     pub fn createCells(self: Shape) void {
         switch (self) {
@@ -49,5 +49,12 @@ pub const SquareShape = struct {
 
         self.cells[3].x = x;
         self.cells[3].y = y + 1;
+    }
+
+    fn createCell(self: *Self) !*Cell {
+        var cell = try self.allocator.create(Cell);
+        cell.type = CELL_BLOCK;
+        cell.allocator = self.allocator;
+        return cell;
     }
 };

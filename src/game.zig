@@ -11,6 +11,7 @@ const CellType = @import("cell.zig").CellType;
 const CELL_BLOCK = @import("cell.zig").CELL_BLOCK;
 const CELL_NONE = @import("cell.zig").CELL_NONE;
 const CELL_WALL = @import("cell.zig").CELL_WALL;
+const CELL_FLOOR = @import("cell.zig").CELL_FLOOR;
 
 const Block = @import("block.zig").Block;
 
@@ -42,13 +43,7 @@ pub const Game = struct {
     pub fn createPlayerBlock(self: *Self) !*Block {
         self.current_block = try Block.init(self.allocator);
 
-        const max_x = self.maxWidth();
-        const max_y = self.maxHeight();
-
-        const begin_y = @divTrunc(max_y, 4);
-        const center_x = @divTrunc(max_x, 2);
-
-        self.current_block.setPosition(center_x, begin_y);
+        self.placePlayerBlock();
 
         return self.current_block;
     }
@@ -61,17 +56,17 @@ pub const Game = struct {
         self.addWalls();
     }
 
-    pub fn update(self: *Self) void {
+    pub fn update(self: *Self) !void {
         self.renderer.clear();
 
         if (self.loop_counter == TICK_RATE) {
-            self.tick();
+            try self.tick();
             self.loop_counter = 0;
         }
 
         _ = Input.listen();
 
-        self.processInput(Input.getPressedKey());
+        try self.processInput(Input.getPressedKey());
 
         self.render();
 
@@ -82,16 +77,16 @@ pub const Game = struct {
         self.loop_counter += 1;
     }
 
-    fn processInput(self: *Self, sym: c_int) void {
+    fn processInput(self: *Self, sym: c_int) !void {
         switch (sym) {
             c.SDLK_LEFT => {
-                self.moveLeft();
+                try self.move(-1, 0);
             },
             c.SDLK_RIGHT => {
-                self.moveRight();
+                try self.move(1, 0);
             },
             c.SDLK_DOWN => {
-                self.moveDown();
+                try self.move(0, 1);
             },
             else => {},
         }
@@ -108,20 +103,44 @@ pub const Game = struct {
         self.current_block.render(self.renderer);
     }
 
-    fn tick(self: *Self) void {
-        self.current_block.translate(0, 1);
+    fn tick(self: *Self) !void {
+        try self.move(0, 1);
     }
 
-    fn moveDown(self: *Self) void {
-        self.current_block.translate(0, 1);
+    fn canTranslateBy(self: *Self, x: i32, y: i32) bool {
+        return !self.current_block.willIntersects(CELL_WALL | CELL_BLOCK, x, y, &self.cells);
     }
 
-    fn moveLeft(self: *Self) void {
-        self.current_block.translate(-1, 0);
+    fn willTouchFloor(self: *Self, x: i32, y: i32) bool {
+        return self.current_block.willIntersects(CELL_FLOOR | CELL_BLOCK, x, y, &self.cells);
     }
 
-    fn moveRight(self: *Self) void {
-        self.current_block.translate(1, 0);
+    fn move(self: *Self, x: i32, y: i32) !void {
+        if (self.willTouchFloor(0, 1)) {
+            try self.dropCurrentBlock();
+            return;
+        }
+
+        var translate = self.canTranslateBy(x, y);
+        if (translate) {
+            self.current_block.translate(x, y);
+        }
+    }
+
+    fn dropCurrentBlock(self: *Self) !void {
+        self.current_block.copyToCells(&self.cells);
+
+        self.placePlayerBlock();
+    }
+
+    fn placePlayerBlock(self: *Self) void {
+        const max_x = self.maxWidth();
+        const max_y = self.maxHeight();
+
+        const begin_y = @divTrunc(max_y, 4);
+        const center_x = @divTrunc(max_x, 2);
+
+        self.current_block.setPosition(center_x, begin_y);
     }
 
     fn addWalls(self: *Self) void {
@@ -151,7 +170,8 @@ pub const Game = struct {
                 var y_index = @intCast(usize, y);
 
                 if (isLeftWall or isRightWall or isBottomWall) {
-                    self.cells[x_index][y_index] = Cell{ .allocator = self.allocator, .x = @as(i32, x), .y = @as(i32, y), .type = CELL_WALL };
+                    var cell_type: u8 = if (isBottomWall) CELL_FLOOR else CELL_WALL;
+                    self.cells[x_index][y_index] = Cell{ .allocator = self.allocator, .x = @as(i32, x), .y = @as(i32, y), .type = cell_type };
                 } else {
                     self.cells[x_index][y_index] = Cell{ .allocator = self.allocator, .x = @as(i32, x), .y = @as(i32, y), .type = CELL_NONE };
                 }
