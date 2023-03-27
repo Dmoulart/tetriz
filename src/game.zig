@@ -155,11 +155,11 @@ pub const Game = struct {
         const max_x = self.maxWidth();
         const max_y = self.maxHeight();
 
-        const begin_x = self.blocksXBegin();
-        const end_x = self.blocksXEnd() + 1;
+        const begin_x = self.wallsXBegin();
+        const end_x = self.wallsXEnd() + 1;
 
-        const begin_y = self.blocksYBegin();
-        const end_y = self.blocksYEnd();
+        const begin_y = self.wallsYBegin();
+        const end_y = self.wallsYEnd();
 
         while (x <= max_x) : (x += 1) {
             y = 0;
@@ -187,14 +187,14 @@ pub const Game = struct {
     fn detectFilledLines(self: *Self) void {
         self.filled_lines = undefined;
 
-        var y: i32 = self.blocksYEnd() - 1;
+        var y: i32 = self.wallsYEnd() - 1;
 
-        while (y > self.blocksYBegin()) : (y -= 1) {
-            var x: i32 = self.blocksXBegin() + 1;
+        while (y > self.wallsYBegin()) : (y -= 1) {
+            var x: i32 = self.wallsXBegin() + 1;
             var x_index = @intCast(usize, x);
             var y_index = @intCast(usize, y);
 
-            while (x <= self.blocksXEnd()) : (x += 1) {
+            while (x <= self.wallsXEnd()) : (x += 1) {
                 x_index = @intCast(usize, x);
 
                 if (self.cells[x_index][y_index].type & CELL_BLOCK != CELL_BLOCK) {
@@ -210,32 +210,32 @@ pub const Game = struct {
     fn clearFilledLines(self: *Self) void {
         for (self.filled_lines) |filled, y| {
             if (!filled) continue;
-            var x = self.blocksXBegin() + 1;
+            var x = self.wallsXBegin() + 1;
             var y_index = @intCast(usize, y);
-            while (x <= self.blocksXEnd()) : (x += 1) {
+            while (x <= self.wallsXEnd()) : (x += 1) {
                 var x_index = @intCast(usize, x);
                 self.cells[x_index][y_index].type = CELL_NONE;
             }
         }
     }
 
-    fn blocksXBegin(self: *Self) i32 {
+    fn wallsXBegin(self: *Self) i32 {
         const max_x = self.maxWidth();
         return @divTrunc(max_x, 4);
     }
 
-    fn blocksXEnd(self: *Self) i32 {
-        const begin_x = self.blocksXBegin();
+    fn wallsXEnd(self: *Self) i32 {
+        const begin_x = self.wallsXBegin();
         return begin_x * 3;
     }
 
-    fn blocksYBegin(self: *Self) i32 {
+    fn wallsYBegin(self: *Self) i32 {
         const max_y = self.maxHeight();
         return @divTrunc(max_y, 4);
     }
 
-    fn blocksYEnd(self: *Self) i32 {
-        const begin_y = self.blocksYBegin();
+    fn wallsYEnd(self: *Self) i32 {
+        const begin_y = self.wallsYBegin();
         return begin_y * 3;
     }
 
