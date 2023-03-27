@@ -120,9 +120,10 @@ pub const Game = struct {
     fn move(self: *Self, x: i32, y: i32) !void {
         if (self.willTouchFloor(0, 1)) {
             try self.dropCurrentBlock();
-            _ = self.detectFilledLines();
+            self.detectFilledLines();
             self.clearFilledLines();
-            // std.debug.print("Filled lines {any}", .{self.filled_lines});
+            self.placePlayerBlock();
+
             return;
         }
 
@@ -134,8 +135,6 @@ pub const Game = struct {
 
     fn dropCurrentBlock(self: *Self) !void {
         self.current_block.copyToCells(&self.cells);
-
-        self.placePlayerBlock();
     }
 
     fn placePlayerBlock(self: *Self) void {
@@ -210,8 +209,10 @@ pub const Game = struct {
     fn clearFilledLines(self: *Self) void {
         for (self.filled_lines) |filled, y| {
             if (!filled) continue;
+
             var x = self.wallsXBegin() + 1;
             var y_index = @intCast(usize, y);
+
             while (x <= self.wallsXEnd()) : (x += 1) {
                 var x_index = @intCast(usize, x);
                 self.cells[x_index][y_index].type = CELL_NONE;
