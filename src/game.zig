@@ -33,6 +33,8 @@ pub const Game = struct {
 
     renderer: *Renderer,
 
+    filled_lines: [Conf.MAX_HEIGHT]bool = undefined,
+
     pub fn init(allocator: *std.mem.Allocator) !*Game {
         var game = try allocator.create(Game);
         game.allocator = allocator;
@@ -118,6 +120,9 @@ pub const Game = struct {
     fn move(self: *Self, x: i32, y: i32) !void {
         if (self.willTouchFloor(0, 1)) {
             try self.dropCurrentBlock();
+            _ = self.detectFilledLines();
+            self.clearFilledLines();
+            // std.debug.print("Filled lines {any}", .{self.filled_lines});
             return;
         }
 
@@ -151,7 +156,7 @@ pub const Game = struct {
         const max_y = self.maxHeight();
 
         const begin_x = self.blocksXBegin();
-        const end_x = self.blocksXEnd();
+        const end_x = self.blocksXEnd() + 1;
 
         const begin_y = self.blocksYBegin();
         const end_y = self.blocksYEnd();
@@ -179,32 +184,40 @@ pub const Game = struct {
         }
     }
 
-    // fn clearFilledLines(self: *Self) void {
-    //     var x: i32 = 0;
-    //     var y: i32 = 0;
+    fn detectFilledLines(self: *Self) void {
+        self.filled_lines = undefined;
 
-    //     while (y <= max_x) : (x += 1) {
-    //         y = 0;
+        var y: i32 = self.blocksYEnd() - 1;
 
-    //         while (y <= max_y) : (y += 1) {
-    //             const isLeftWall = x == begin_x and y <= end_y and y >= begin_y;
+        while (y > self.blocksYBegin()) : (y -= 1) {
+            var x: i32 = self.blocksXBegin() + 1;
+            var x_index = @intCast(usize, x);
+            var y_index = @intCast(usize, y);
 
-    //             const isRightWall = x == end_x and y <= end_y and y >= begin_y;
+            while (x <= self.blocksXEnd()) : (x += 1) {
+                x_index = @intCast(usize, x);
 
-    //             const isBottomWall = y == end_y and x >= begin_x and x <= end_x;
+                if (self.cells[x_index][y_index].type & CELL_BLOCK != CELL_BLOCK) {
+                    self.filled_lines[y_index] = false;
+                    return;
+                }
+            }
 
-    //             var x_index = @intCast(usize, x);
-    //             var y_index = @intCast(usize, y);
+            self.filled_lines[y_index] = true;
+        }
+    }
 
-    //             if (isLeftWall or isRightWall or isBottomWall) {
-    //                 var cell_type: u8 = if (isBottomWall) CELL_FLOOR else CELL_WALL;
-    //                 self.cells[x_index][y_index] = Cell{ .allocator = self.allocator, .x = @as(i32, x), .y = @as(i32, y), .type = cell_type };
-    //             } else {
-    //                 self.cells[x_index][y_index] = Cell{ .allocator = self.allocator, .x = @as(i32, x), .y = @as(i32, y), .type = CELL_NONE };
-    //             }
-    //         }
-    //     }
-    // }
+    fn clearFilledLines(self: *Self) void {
+        for (self.filled_lines) |filled, y| {
+            if (!filled) continue;
+            var x = self.blocksXBegin() + 1;
+            var y_index = @intCast(usize, y);
+            while (x <= self.blocksXEnd()) : (x += 1) {
+                var x_index = @intCast(usize, x);
+                self.cells[x_index][y_index].type = CELL_NONE;
+            }
+        }
+    }
 
     fn blocksXBegin(self: *Self) i32 {
         const max_x = self.maxWidth();

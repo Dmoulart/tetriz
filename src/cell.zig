@@ -43,7 +43,7 @@ pub const Cell = struct {
         return false;
     }
 
-    fn is(self: *Self, flag: u8) bool {
+    pub fn is(self: *Self, flag: u8) bool {
         return (self.type & flag) == flag;
     }
 };
