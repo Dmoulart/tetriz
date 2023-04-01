@@ -220,18 +220,28 @@ pub const Game = struct {
                 self.cells[x_index][y_index].type = CELL_NONE;
             }
 
-            // for (&self.cells) |col| {
-            //     for (col) |row, i| {
-            //         var column = col;
-            //         var cell = row;
+            self.lowerAllBocksCells();
+        }
+    }
 
-            //         if (cell.is(CELL_BLOCK)) {
-            //             std.debug.print("CELL BLCOK ", .{});
-            //             cell.type = CELL_NONE;
-            //             column[i].type = CELL_BLOCK;
-            //         }
-            //     }
-            // }
+    fn lowerAllBocksCells(self: *Self) void {
+        var y: i32 = self.wallsYEnd() - 1;
+
+        while (y > self.wallsYBegin()) : (y -= 1) {
+            var x: i32 = self.wallsXBegin() + 1;
+            var x_index = @intCast(usize, x);
+            var y_index = @intCast(usize, y);
+
+            while (x <= self.wallsXEnd()) : (x += 1) {
+                x_index = @intCast(usize, x);
+
+                if (self.cells[x_index][y_index].type & CELL_BLOCK == CELL_BLOCK) {
+                    self.cells[x_index][y_index].type = CELL_NONE;
+                    if (y_index + 1 <= self.cells[x_index].len) {
+                        self.cells[x_index][y_index + 1].type = CELL_BLOCK;
+                    }
+                }
+            }
         }
     }
 
