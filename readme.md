@@ -1,6 +1,6 @@
 # Tetriz
 
-A small buggt tetris game in zig
+A small buggy tetris game in zig
 
 - Left and Right Arrows to move.
 
