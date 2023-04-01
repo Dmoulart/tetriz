@@ -17,7 +17,7 @@ const CELL_WALL = @import("cell.zig").CELL_WALL;
 
 const COLORS = [_]u32{ 0x227C9DFF, 0x17C3B2FF, 0xFFCB77FF, 0xFE6D73FF };
 
-pub const BlockType = enum(u8) { Square, Line, L, T };
+pub const BlockType = enum(u8) { Square, Line, L, T, S };
 
 var SQUARE_CELLS_POS = [_][2]f16{ [_]f16{ 0, 0 }, [_]f16{ 1, 0 }, [_]f16{ 1, 1 }, [_]f16{ 0, 1 } };
 
@@ -26,6 +26,8 @@ var LINE_CELLS_POS = [_][2]f16{ [_]f16{ 0, -2 }, [_]f16{ 0, -1 }, [_]f16{ 0, 0 }
 var L_CELLS_POS = [_][2]f16{ [_]f16{ 0, -1 }, [_]f16{ 0, 0 }, [_]f16{ 0, 1 }, [_]f16{ 1, 1 } };
 
 var T_CELLS_POS = [_][2]f16{ [_]f16{ -1, 0 }, [_]f16{ 0, 0 }, [_]f16{ 0, 1 }, [_]f16{ 1, 0 } };
+
+var S_CELLS_POS = [_][2]f16{ [_]f16{ -1, -1 }, [_]f16{ -1, 0 }, [_]f16{ 0, 0 }, [_]f16{ 0, 1 } };
 
 pub const Block = struct {
     const Self = @This();
@@ -37,6 +39,8 @@ pub const Block = struct {
     line_cells: [5]*Cell,
     l_cells: [4]*Cell,
     t_cells: [4]*Cell,
+    s_cells: [4]*Cell,
+
     R: std.rand.Xoshiro256 = undefined,
 
     x: i32,
@@ -106,6 +110,7 @@ pub const Block = struct {
             .Line => &self.line_cells,
             .L => &self.l_cells,
             .T => &self.t_cells,
+            .S => &self.s_cells,
         };
     }
 
@@ -134,6 +139,7 @@ pub const Block = struct {
             1 => BlockType.Line,
             2 => BlockType.L,
             3 => BlockType.T,
+            4 => BlockType.S,
             else => BlockType.Square,
         };
 
@@ -169,6 +175,13 @@ pub const Block = struct {
             try self.createCell(),
             try self.createCell(),
         };
+
+        self.s_cells = [4]*Cell{
+            try self.createCell(),
+            try self.createCell(),
+            try self.createCell(),
+            try self.createCell(),
+        };
     }
 
     fn createCell(self: *Self) !*Cell {
@@ -184,6 +197,7 @@ pub const Block = struct {
             .Line => LINE_CELLS_POS[0..LINE_CELLS_POS.len],
             .L => L_CELLS_POS[0..L_CELLS_POS.len],
             .T => T_CELLS_POS[0..T_CELLS_POS.len],
+            .S => S_CELLS_POS[0..S_CELLS_POS.len],
         };
     }
 
