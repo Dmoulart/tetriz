@@ -15,6 +15,8 @@ const CELL_BLOCK = @import("cell.zig").CELL_BLOCK;
 const CELL_NONE = @import("cell.zig").CELL_NONE;
 const CELL_WALL = @import("cell.zig").CELL_WALL;
 
+const COLORS = [_]u32{ 0x227C9DFF, 0x17C3B2FF, 0xFFCB77FF, 0xFE6D73FF };
+
 pub const BlockType = enum(u8) { Square, Line, L, T };
 
 var SQUARE_CELLS_POS = [_][2]f16{ [_]f16{ 0, 0 }, [_]f16{ 1, 0 }, [_]f16{ 1, 1 }, [_]f16{ 0, 1 } };
@@ -110,8 +112,11 @@ pub const Block = struct {
 
     pub fn pickColor(self: *Self) void {
         var cells = self.getShapeCells();
+        var i = R.random().intRangeAtMost(usize, 0, COLORS.len - 1);
+        var color = COLORS[i];
+
         for (cells) |cell| {
-            cell.color = 0x0000ffff;
+            cell.color = color;
         }
     }
 
