@@ -94,6 +94,9 @@ pub const Game = struct {
             c.SDLK_a => {
                 self.rotate();
             },
+            c.SDLK_UP => {
+                self.rotate();
+            },
             else => {},
         }
     }

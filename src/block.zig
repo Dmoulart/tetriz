@@ -20,9 +20,12 @@ const COLORS = [_]u32{ 0x227C9DFF, 0x17C3B2FF, 0xFFCB77FF, 0xFE6D73FF };
 pub const BlockType = enum(u8) { Square, Line, L, T };
 
 var SQUARE_CELLS_POS = [_][2]f16{ [_]f16{ 0, 0 }, [_]f16{ 1, 0 }, [_]f16{ 1, 1 }, [_]f16{ 0, 1 } };
+
 var LINE_CELLS_POS = [_][2]f16{ [_]f16{ 0, 0 }, [_]f16{ 0, 1 }, [_]f16{ 0, 2 }, [_]f16{ 0, 3 }, [_]f16{ 0, 4 } };
+
 var L_CELLS_POS = [_][2]f16{ [_]f16{ 0, 0 }, [_]f16{ 0, 1 }, [_]f16{ 0, 2 }, [_]f16{ 1, 2 } };
-var T_CELLS_POS = [_][2]f16{ [_]f16{ 0, 0 }, [_]f16{ 1, 0 }, [_]f16{ 1, 1 }, [_]f16{ 2, 0 } };
+
+var T_CELLS_POS = [_][2]f16{ [_]f16{ -1, 0 }, [_]f16{ 0, 0 }, [_]f16{ 0, 1 }, [_]f16{ 1, 0 } };
 
 pub const Block = struct {
     const Self = @This();
@@ -195,14 +198,20 @@ pub const Block = struct {
             var cell_x = vec[0];
             var cell_y = vec[1];
 
-            var x = (cos * cell_x) - (sin * cell_y);
-            var y = (sin * cell_x) + (cos * cell_y);
+            if (self.type != BlockType.Square) {
+                var x = (cos * cell_x) - (sin * cell_y);
+                var y = (sin * cell_x) + (cos * cell_y);
 
-            x = @round(x);
-            y = @round(y);
+                x = @round(x);
+                y = @round(y);
 
-            cells[i].x = self.x + @floatToInt(i32, x);
-            cells[i].y = self.y + @floatToInt(i32, y);
+                cells[i].x = self.x + @floatToInt(i32, x);
+                cells[i].y = self.y + @floatToInt(i32, y);
+            } else {
+                // Don't rotate if its a square
+                cells[i].x = self.x + @floatToInt(i32, cell_x);
+                cells[i].y = self.y + @floatToInt(i32, cell_y);
+            }
         }
     }
 };
