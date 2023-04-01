@@ -14,6 +14,7 @@ const SquareShape = @import("shape.zig").SquareShape;
 const CELL_BLOCK = @import("cell.zig").CELL_BLOCK;
 const CELL_NONE = @import("cell.zig").CELL_NONE;
 const CELL_WALL = @import("cell.zig").CELL_WALL;
+const CELL_FLOOR = @import("cell.zig").CELL_FLOOR;
 
 const COLORS = [_]u32{ 0x227C9DFF, 0x17C3B2FF, 0xFFCB77FF, 0xFE6D73FF };
 
@@ -61,6 +62,10 @@ pub const Block = struct {
         return block;
     }
 
+    pub fn deinit(allocator: *std.mem.Allocator, block: *Block) void {
+        allocator.destroy(block);
+    }
+
     pub fn setPosition(self: *Self, x: i32, y: i32) void {
         self.x = x;
         self.y = y;
@@ -78,6 +83,29 @@ pub const Block = struct {
         self.x += x;
         self.y += y;
 
+        self.syncCells();
+    }
+
+    pub fn renderProjection(self: *Self, cells: *Cells, renderer: *Renderer) !void {
+        var start_y = self.y;
+
+        while (!self.willIntersects(CELL_BLOCK | CELL_WALL | CELL_FLOOR, 0, 1, cells)) {
+            self.y += 1;
+            self.syncCells();
+        }
+
+        for (self.getShapeCells()) |cell| {
+            var projected = try Cell.init(self.allocator);
+            projected.color = 0xFAFAFA44;
+            projected.type = cell.type;
+            projected.x = cell.x;
+            projected.y = cell.y;
+
+            projected.render(renderer);
+            Cell.deinit(self.allocator, projected);
+        }
+
+        self.y = start_y;
         self.syncCells();
     }
 
@@ -102,16 +130,6 @@ pub const Block = struct {
     pub fn rotate(self: *Self) void {
         self.angle = if (self.angle + 90 >= 360) 0 else self.angle + 90;
         self.syncCells();
-    }
-
-    fn getShapeCells(self: *Self) []*Cell {
-        return switch (self.type) {
-            .Square => &self.square_cells,
-            .Line => &self.line_cells,
-            .L => &self.l_cells,
-            .T => &self.t_cells,
-            .S => &self.s_cells,
-        };
     }
 
     pub fn changePlayerBlockType(self: *Self, _: BlockType) !void {
@@ -181,6 +199,16 @@ pub const Block = struct {
             try self.createCell(),
             try self.createCell(),
             try self.createCell(),
+        };
+    }
+
+    fn getShapeCells(self: *Self) []*Cell {
+        return switch (self.type) {
+            .Square => &self.square_cells,
+            .Line => &self.line_cells,
+            .L => &self.l_cells,
+            .T => &self.t_cells,
+            .S => &self.s_cells,
         };
     }
 

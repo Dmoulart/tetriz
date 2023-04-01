@@ -27,6 +27,8 @@ pub const Renderer = struct {
 
         renderer.sdl_rect = c.SDL_Rect{ .x = @intCast(c_int, 0), .y = @intCast(c_int, 0), .w = 10, .h = 10 };
 
+        _ = c.SDL_SetRenderDrawBlendMode(renderer.sdl_renderer, c.SDL_BLENDMODE_BLEND);
+
         return renderer;
     }
 

@@ -28,6 +28,10 @@ pub const Cell = struct {
         return cell;
     }
 
+    pub fn deinit(allocator: *std.mem.Allocator, cell: *Cell) void {
+        allocator.destroy(cell);
+    }
+
     pub fn render(self: *Self, renderer: *Renderer) void {
         if (self.is(CELL_WALL) or self.is(CELL_BLOCK) or self.is(CELL_FLOOR)) {
             var color = self.color;
@@ -45,6 +49,8 @@ pub const Cell = struct {
     pub fn willIntersects(self: *Self, flag: u8, x: i32, y: i32, cells: *Cells) bool {
         var newX = @intCast(usize, self.x + x);
         var newY = @intCast(usize, self.y + y);
+
+        // if (newX >= cells.len or newY >= cells[newX].len) return false;
 
         if ((cells[newX][newY].type & flag) != 0) {
             return true;

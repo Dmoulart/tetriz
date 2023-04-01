@@ -76,9 +76,7 @@ pub const Game = struct {
 
         try self.processInput(Input.getPressedKey());
 
-        self.render();
-
-        self.renderer.render();
+        try self.render();
 
         c.SDL_Delay(16);
 
@@ -115,7 +113,7 @@ pub const Game = struct {
         }
     }
 
-    fn render(self: *Self) void {
+    fn render(self: *Self) !void {
         for (self.cells) |col| {
             for (col) |colCell| {
                 var cell = colCell;
@@ -124,6 +122,9 @@ pub const Game = struct {
         }
 
         self.current_block.render(self.renderer);
+        try self.current_block.renderProjection(&self.cells, self.renderer);
+
+        self.renderer.render();
     }
 
     fn tick(self: *Self) !void {
