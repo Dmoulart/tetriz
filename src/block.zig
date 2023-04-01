@@ -1,4 +1,6 @@
 const std = @import("std");
+var R = std.rand.DefaultPrng.init(2);
+
 const Renderer = @import("lib/renderer.zig").Renderer;
 
 const Conf = @import("conf.zig");
@@ -13,7 +15,22 @@ const CELL_NONE = @import("cell.zig").CELL_NONE;
 const CELL_WALL = @import("cell.zig").CELL_WALL;
 
 pub const BlockType = enum(u8) { Square, Line, L, T };
-var R = std.rand.DefaultPrng.init(2);
+
+var SQUARE_CELLS_POS = [_][2]i32{ [_]i32{ 0, 0 }, [_]i32{ 1, 0 }, [_]i32{ 1, 1 }, [_]i32{ 0, 1 } };
+var LINE_CELLS_POS = [_][2]i32{ [_]i32{ 0, 0 }, [_]i32{ 0, 1 }, [_]i32{ 0, 2 }, [_]i32{ 0, 3 }, [_]i32{ 0, 4 } };
+var L_CELLS_POS = [_][2]i32{ [_]i32{ 0, 0 }, [_]i32{ 0, 1 }, [_]i32{ 0, 2 }, [_]i32{ 1, 2 } };
+//    self.t_cells[0].x = self.x;
+//                 self.t_cells[0].y = self.y;
+
+//                 self.t_cells[1].x = self.x + 1;
+//                 self.t_cells[1].y = self.y;
+
+//                 self.t_cells[2].x = self.x + 1;
+//                 self.t_cells[2].y = self.y + 1;
+
+//                 self.t_cells[3].x = self.x + 2;
+//                 self.t_cells[3].y = self.y;
+var T_CELLS_POS = [_][2]i32{ [_]i32{ 1, 0 }, [_]i32{ 1, 1 }, [_]i32{ 2, 0 } };
 
 pub const Block = struct {
     const Self = @This();
@@ -146,63 +163,33 @@ pub const Block = struct {
         return cell;
     }
 
+    fn getCellPositions(self: *Self) *[][2]i32 {
+        return switch (self.type) {
+            .Square => 
+              &SQUARE_CELLS_POS[0..SQUARE_CELLS_POS.len]
+               
+            ,
+            .Line => &LINE_CELLS_POS[0..LINE_CELLS_POS.len],
+            .L => &L_CELLS_POS[0..L_CELLS_POS.len],
+            .T => &T_CELLS_POS[0..T_CELLS_POS.len],
+        };
+    }
+
     fn syncCells(self: *Self) void {
-        switch (self.type) {
-            .Square => {
-                self.square_cells[0].x = self.x;
-                self.square_cells[0].y = self.y;
+        // var positions =
+        //     switch (self.type) {
+        //     .Square => SQUARE_CELLS_POS,
+        //     .Line => LINE_CELLS_POS,
+        //     .L => L_CELLS_POS,
+        //     .T => T_CELLS_POS,
+        // };
 
-                self.square_cells[1].x = self.x + 1;
-                self.square_cells[1].y = self.y;
+        var positions = self.getCellPositions();
+        var cells = self.getShapeCells();
 
-                self.square_cells[2].x = self.x + 1;
-                self.square_cells[2].y = self.y + 1;
-
-                self.square_cells[3].x = self.x;
-                self.square_cells[3].y = self.y + 1;
-            },
-            .Line => {
-                self.line_cells[0].x = self.x;
-                self.line_cells[0].y = self.y;
-
-                self.line_cells[1].x = self.x;
-                self.line_cells[1].y = self.y + 1;
-
-                self.line_cells[2].x = self.x;
-                self.line_cells[2].y = self.y + 2;
-
-                self.line_cells[3].x = self.x;
-                self.line_cells[3].y = self.y + 3;
-
-                self.line_cells[4].x = self.x;
-                self.line_cells[4].y = self.y + 4;
-            },
-            .L => {
-                self.l_cells[0].x = self.x;
-                self.l_cells[0].y = self.y;
-
-                self.l_cells[1].x = self.x;
-                self.l_cells[1].y = self.y + 1;
-
-                self.l_cells[2].x = self.x;
-                self.l_cells[2].y = self.y + 2;
-
-                self.l_cells[3].x = self.x + 1;
-                self.l_cells[3].y = self.y + 2;
-            },
-            .T => {
-                self.t_cells[0].x = self.x;
-                self.t_cells[0].y = self.y;
-
-                self.t_cells[1].x = self.x + 1;
-                self.t_cells[1].y = self.y;
-
-                self.t_cells[2].x = self.x + 1;
-                self.t_cells[2].y = self.y + 1;
-
-                self.t_cells[3].x = self.x + 2;
-                self.t_cells[3].y = self.y;
-            },
+        for (&positions) |vec, i| {
+            cells[i].x = self.x + vec[0];
+            cells[i].y = self.y + vec[1];
         }
     }
 };
