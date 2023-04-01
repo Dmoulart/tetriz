@@ -1,5 +1,5 @@
 const std = @import("std");
-var R = std.rand.DefaultPrng.init(2);
+var Random = std.rand.DefaultPrng.init(2);
 const math = std.math;
 
 const Renderer = @import("lib/renderer.zig").Renderer;
@@ -37,6 +37,7 @@ pub const Block = struct {
     line_cells: [5]*Cell,
     l_cells: [4]*Cell,
     t_cells: [4]*Cell,
+    R: std.rand.Xoshiro256 = undefined,
 
     x: i32,
     y: i32,
@@ -49,6 +50,7 @@ pub const Block = struct {
         block.x = 0;
         block.y = 0;
         block.angle = 0;
+        block.initRandom();
         block.type = block.pickType();
         try block.createCells();
         block.pickColor();
@@ -115,7 +117,7 @@ pub const Block = struct {
 
     pub fn pickColor(self: *Self) void {
         var cells = self.getShapeCells();
-        var i = R.random().intRangeAtMost(usize, 0, COLORS.len - 1);
+        var i = self.getRandom().random().intRangeAtMost(usize, 0, COLORS.len - 1);
         var color = COLORS[i];
 
         for (cells) |cell| {
@@ -124,9 +126,8 @@ pub const Block = struct {
     }
 
     pub fn pickType(self: *Self) BlockType {
-        _ = self;
         var blocks_len = @intCast(u8, @typeInfo(BlockType).Enum.fields.len);
-        var random_block_type = R.random().intRangeAtMost(u8, 0, blocks_len);
+        var random_block_type = self.getRandom().random().intRangeAtMost(u8, 0, blocks_len);
 
         var block_type = switch (random_block_type) {
             0 => BlockType.Square,
@@ -218,5 +219,13 @@ pub const Block = struct {
             cells[i].x = self.x + @floatToInt(i32, x);
             cells[i].y = self.y + @floatToInt(i32, y);
         }
+    }
+
+    fn initRandom(self: *Self) void {
+        self.R = std.rand.DefaultPrng.init(@intCast(u64, std.time.timestamp()));
+    }
+
+    fn getRandom(self: *Self) *std.rand.Xoshiro256 {
+        return &self.R;
     }
 };
