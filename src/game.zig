@@ -27,9 +27,7 @@ pub const Game = struct {
 
     var TICK_RATE: u32 = STARTING_TICK_RATE;
 
-    loop_counter: u8 = 0,
-
-    total_loop_counter: u128 = 0,
+    loop_counter: u128 = 0,
 
     allocator: *std.mem.Allocator,
     cells: Cells,
@@ -43,8 +41,8 @@ pub const Game = struct {
     pub fn init(allocator: *std.mem.Allocator) !*Game {
         var game = try allocator.create(Game);
         game.allocator = allocator;
+
         game.loop_counter = 0;
-        game.total_loop_counter = 0;
         return game;
     }
 
@@ -67,9 +65,8 @@ pub const Game = struct {
     pub fn update(self: *Self) !void {
         self.renderer.clear();
 
-        if (self.loop_counter == TICK_RATE) {
+        if (self.loop_counter % TICK_RATE == 0) {
             try self.tick();
-            self.loop_counter = 0;
         }
 
         _ = Input.listen();
@@ -82,9 +79,7 @@ pub const Game = struct {
 
         self.loop_counter += 1;
 
-        self.total_loop_counter += 1;
-
-        if (self.total_loop_counter % 1000 == 1) {
+        if (self.loop_counter % 1000 == 1) {
             TICK_RATE -= 1;
         }
     }
