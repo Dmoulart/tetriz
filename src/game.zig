@@ -202,7 +202,7 @@ pub const Game = struct {
 
         var y: i32 = self.wallsYEnd() - 1;
 
-        while (y > self.wallsYBegin()) : (y -= 1) {
+        yloop: while (y > self.wallsYBegin()) : (y -= 1) {
             var x: i32 = self.wallsXBegin() + 1;
             var x_index = @intCast(usize, x);
             var y_index = @intCast(usize, y);
@@ -212,7 +212,7 @@ pub const Game = struct {
 
                 if (self.cells[x_index][y_index].type & CELL_BLOCK != CELL_BLOCK) {
                     self.filled_lines[y_index] = false;
-                    return;
+                    continue :yloop;
                 }
             }
 
@@ -232,12 +232,13 @@ pub const Game = struct {
                 self.cells[x_index][y_index].type = CELL_NONE;
             }
 
-            self.lowerAllBocksCells();
+            self.lowerAllBocksCells(y_index);
         }
     }
 
-    fn lowerAllBocksCells(self: *Self) void {
-        var y: i32 = self.wallsYEnd() - 1;
+    fn lowerAllBocksCells(self: *Self, from: usize) void {
+        // var y: i32 = self.wallsYEnd() - 1;
+        var y = from;
 
         while (y > self.wallsYBegin()) : (y -= 1) {
             var x: i32 = self.wallsXBegin() + 1;
@@ -259,6 +260,13 @@ pub const Game = struct {
 
     fn rotate(self: *Self) void {
         self.current_block.rotate();
+
+        var intersects = self.current_block.willIntersects(CELL_WALL, 0, 0, &self.cells);
+        if (intersects) {
+            while (self.current_block.willIntersects(CELL_WALL, 0, 0, &self.cells)) {
+                self.current_block.rotate();
+            }
+        }
     }
 
     fn wallsXBegin(self: *Self) i32 {
