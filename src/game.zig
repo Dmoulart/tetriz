@@ -20,12 +20,16 @@ const Conf = @import("conf.zig");
 
 pub const Cells = [Conf.MAX_WIDTH][Conf.MAX_HEIGHT]Cell;
 
+const STARTING_TICK_RATE = 60;
+
 pub const Game = struct {
     const Self = @This();
 
-    const TICK_RATE = 60;
+    var TICK_RATE: u32 = STARTING_TICK_RATE;
 
     loop_counter: u8 = 0,
+
+    total_loop_counter: u128 = 0,
 
     allocator: *std.mem.Allocator,
     cells: Cells,
@@ -40,6 +44,7 @@ pub const Game = struct {
         var game = try allocator.create(Game);
         game.allocator = allocator;
         game.loop_counter = 0;
+        game.total_loop_counter = 0;
         return game;
     }
 
@@ -78,6 +83,12 @@ pub const Game = struct {
         c.SDL_Delay(16);
 
         self.loop_counter += 1;
+
+        self.total_loop_counter += 1;
+
+        if (self.total_loop_counter % 1000 == 1) {
+            TICK_RATE -= 1;
+        }
     }
 
     fn processInput(self: *Self, sym: c_int) !void {
