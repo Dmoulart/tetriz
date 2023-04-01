@@ -91,6 +91,9 @@ pub const Game = struct {
             c.SDLK_DOWN => {
                 try self.move(0, 1);
             },
+            c.SDLK_a => {
+                self.rotate();
+            },
             else => {},
         }
     }
@@ -243,6 +246,10 @@ pub const Game = struct {
                 }
             }
         }
+    }
+
+    fn rotate(self: *Self) void {
+        self.current_block.rotate();
     }
 
     fn wallsXBegin(self: *Self) i32 {

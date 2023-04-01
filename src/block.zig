@@ -1,5 +1,6 @@
 const std = @import("std");
 var R = std.rand.DefaultPrng.init(2);
+const math = std.math;
 
 const Renderer = @import("lib/renderer.zig").Renderer;
 
@@ -16,21 +17,10 @@ const CELL_WALL = @import("cell.zig").CELL_WALL;
 
 pub const BlockType = enum(u8) { Square, Line, L, T };
 
-var SQUARE_CELLS_POS = [_][2]i32{ [_]i32{ 0, 0 }, [_]i32{ 1, 0 }, [_]i32{ 1, 1 }, [_]i32{ 0, 1 } };
-var LINE_CELLS_POS = [_][2]i32{ [_]i32{ 0, 0 }, [_]i32{ 0, 1 }, [_]i32{ 0, 2 }, [_]i32{ 0, 3 }, [_]i32{ 0, 4 } };
-var L_CELLS_POS = [_][2]i32{ [_]i32{ 0, 0 }, [_]i32{ 0, 1 }, [_]i32{ 0, 2 }, [_]i32{ 1, 2 } };
-//    self.t_cells[0].x = self.x;
-//                 self.t_cells[0].y = self.y;
-
-//                 self.t_cells[1].x = self.x + 1;
-//                 self.t_cells[1].y = self.y;
-
-//                 self.t_cells[2].x = self.x + 1;
-//                 self.t_cells[2].y = self.y + 1;
-
-//                 self.t_cells[3].x = self.x + 2;
-//                 self.t_cells[3].y = self.y;
-var T_CELLS_POS = [_][2]i32{ [_]i32{ 1, 0 }, [_]i32{ 1, 1 }, [_]i32{ 2, 0 } };
+var SQUARE_CELLS_POS = [_][2]f16{ [_]f16{ 0, 0 }, [_]f16{ 1, 0 }, [_]f16{ 1, 1 }, [_]f16{ 0, 1 } };
+var LINE_CELLS_POS = [_][2]f16{ [_]f16{ 0, 0 }, [_]f16{ 0, 1 }, [_]f16{ 0, 2 }, [_]f16{ 0, 3 }, [_]f16{ 0, 4 } };
+var L_CELLS_POS = [_][2]f16{ [_]f16{ 0, 0 }, [_]f16{ 0, 1 }, [_]f16{ 0, 2 }, [_]f16{ 1, 2 } };
+var T_CELLS_POS = [_][2]f16{ [_]f16{ 0, 0 }, [_]f16{ 1, 0 }, [_]f16{ 1, 1 }, [_]f16{ 2, 0 } };
 
 pub const Block = struct {
     const Self = @This();
@@ -46,12 +36,15 @@ pub const Block = struct {
     x: i32,
     y: i32,
 
+    angle: f16 = 0,
+
     pub fn init(allocator: *std.mem.Allocator) !*Block {
         var block = try allocator.create(Block);
         block.allocator = allocator;
         block.x = 0;
         block.y = 0;
         block.type = block.pickType();
+        block.angle = 0;
         try block.createCells();
         return block;
     }
@@ -93,6 +86,11 @@ pub const Block = struct {
         }
     }
 
+    pub fn rotate(self: *Self) void {
+        self.angle = if (self.angle + 90 >= 360) 0 else self.angle + 90;
+        self.syncCells();
+    }
+
     fn getShapeCells(self: *Self) []*Cell {
         return switch (self.type) {
             .Square => &self.square_cells,
@@ -119,8 +117,6 @@ pub const Block = struct {
             3 => BlockType.T,
             else => BlockType.Square,
         };
-
-        std.debug.print("\nblock type {}", .{block_type});
 
         return block_type;
     }
@@ -163,33 +159,35 @@ pub const Block = struct {
         return cell;
     }
 
-    fn getCellPositions(self: *Self) *[][2]i32 {
+    fn getBlockTypeCellsPositions(self: *Self) [][2]f16 {
         return switch (self.type) {
-            .Square => 
-              &SQUARE_CELLS_POS[0..SQUARE_CELLS_POS.len]
-               
-            ,
-            .Line => &LINE_CELLS_POS[0..LINE_CELLS_POS.len],
-            .L => &L_CELLS_POS[0..L_CELLS_POS.len],
-            .T => &T_CELLS_POS[0..T_CELLS_POS.len],
+            .Square => SQUARE_CELLS_POS[0..SQUARE_CELLS_POS.len],
+            .Line => LINE_CELLS_POS[0..LINE_CELLS_POS.len],
+            .L => L_CELLS_POS[0..L_CELLS_POS.len],
+            .T => T_CELLS_POS[0..T_CELLS_POS.len],
         };
     }
 
     fn syncCells(self: *Self) void {
-        // var positions =
-        //     switch (self.type) {
-        //     .Square => SQUARE_CELLS_POS,
-        //     .Line => LINE_CELLS_POS,
-        //     .L => L_CELLS_POS,
-        //     .T => T_CELLS_POS,
-        // };
-
-        var positions = self.getCellPositions();
+        var positions = self.getBlockTypeCellsPositions();
         var cells = self.getShapeCells();
 
-        for (&positions) |vec, i| {
-            cells[i].x = self.x + vec[0];
-            cells[i].y = self.y + vec[1];
+        var radians = self.angle * math.pi / 180;
+        var cos = @cos(radians);
+        var sin = @sin(radians);
+
+        for (positions) |vec, i| {
+            var cell_x = vec[0];
+            var cell_y = vec[1];
+
+            var x = (cos * cell_x) - (sin * cell_y);
+            var y = (sin * cell_x) + (cos * cell_y);
+
+            x = @round(x);
+            y = @round(y);
+
+            cells[i].x = self.x + @floatToInt(i32, x);
+            cells[i].y = self.y + @floatToInt(i32, y);
         }
     }
 };
