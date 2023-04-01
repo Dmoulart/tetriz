@@ -12,10 +12,8 @@ const CELL_BLOCK = @import("cell.zig").CELL_BLOCK;
 const CELL_NONE = @import("cell.zig").CELL_NONE;
 const CELL_WALL = @import("cell.zig").CELL_WALL;
 
-pub const BlockType = enum(u8) { Square, Line };
-var R = std.rand.DefaultPrng.init(42);
-
-// const BlockCells = union { Square: [4]Cell };
+pub const BlockType = enum(u8) { Square, Line, L };
+var R = std.rand.DefaultPrng.init(2);
 
 pub const Block = struct {
     const Self = @This();
@@ -23,11 +21,9 @@ pub const Block = struct {
     allocator: *std.mem.Allocator,
     type: BlockType,
 
-    // shape: *Shape,
-
     square_cells: [4]*Cell,
-
     line_cells: [5]*Cell,
+    l_cells: [4]*Cell,
 
     x: i32,
     y: i32,
@@ -37,7 +33,7 @@ pub const Block = struct {
         block.allocator = allocator;
         block.x = 0;
         block.y = 0;
-        block.type = BlockType.Square;
+        block.type = block.pickType();
         try block.createCells();
         return block;
     }
@@ -50,15 +46,8 @@ pub const Block = struct {
     }
 
     pub fn render(self: *Self, renderer: *Renderer) void {
-        if (self.type == BlockType.Square) {
-            for (self.square_cells) |cell| {
-                cell.render(renderer);
-            }
-        }
-        if (self.type == BlockType.Line) {
-            for (self.line_cells) |cell| {
-                cell.render(renderer);
-            }
+        for (self.getShapeCells()) |cell| {
+            cell.render(renderer);
         }
     }
 
@@ -70,37 +59,28 @@ pub const Block = struct {
     }
 
     pub fn willIntersects(self: *Self, flag: u8, x: i32, y: i32, cells: *Cells) bool {
-        switch (self.type) {
-            .Square => {
-                for (self.square_cells) |cell| {
-                    if (cell.willIntersects(flag, x, y, cells)) {
-                        return true;
-                    }
-                }
-                return false;
-            },
-            .Line => {
-                for (self.line_cells) |cell| {
-                    if (cell.willIntersects(flag, x, y, cells)) {
-                        return true;
-                    }
-                }
-                return false;
-            },
+        for (self.getShapeCells()) |cell| {
+            if (cell.willIntersects(flag, x, y, cells)) {
+                return true;
+            }
         }
+        return false;
     }
 
     pub fn copyToCells(self: *Self, cells: *Cells) void {
-        var shape_cells = switch (self.type) {
-            .Square => &self.square_cells,
-            .Line => &self.line_cells,
-        };
-
-        for (shape_cells) |cell| {
+        for (self.getShapeCells()) |cell| {
             var x_index = @intCast(usize, cell.x);
             var y_index = @intCast(usize, cell.y);
             cells[x_index][y_index].type = cell.type;
         }
+    }
+
+    fn getShapeCells(self: *Self) []*Cell {
+        return switch (self.type) {
+            .Square => &self.square_cells,
+            .Line => &self.line_cells,
+            .L => &self.l_cells,
+        };
     }
 
     pub fn changePlayerBlockType(self: *Self, _: BlockType) !void {
@@ -110,14 +90,19 @@ pub const Block = struct {
 
     pub fn pickType(self: *Self) BlockType {
         _ = self;
+        var blocks_len = @intCast(u8, @typeInfo(BlockType).Enum.fields.len);
+        var random_block_type = R.random().intRangeAtMost(u8, 0, blocks_len);
 
-        var block_type = R.random().intRangeAtMost(u8, 0, 2);
+        var block_type = switch (random_block_type) {
+            0 => BlockType.Square,
+            1 => BlockType.Line,
+            2 => BlockType.Line,
+            else => BlockType.Square,
+        };
 
-        switch (block_type) {
-            0 => return BlockType.Square,
-            1 => return BlockType.Line,
-            else => return BlockType.Square,
-        }
+        std.debug.print("\nblock type {}", .{block_type});
+
+        return block_type;
     }
 
     fn createCells(self: *Self) !void {
@@ -130,6 +115,13 @@ pub const Block = struct {
 
         self.line_cells = [5]*Cell{
             try self.createCell(),
+            try self.createCell(),
+            try self.createCell(),
+            try self.createCell(),
+            try self.createCell(),
+        };
+
+        self.l_cells = [4]*Cell{
             try self.createCell(),
             try self.createCell(),
             try self.createCell(),
@@ -174,6 +166,19 @@ pub const Block = struct {
 
                 self.line_cells[4].x = self.x;
                 self.line_cells[4].y = self.y + 4;
+            },
+            .L => {
+                self.l_cells[0].x = self.x;
+                self.l_cells[0].y = self.y;
+
+                self.l_cells[1].x = self.x;
+                self.l_cells[1].y = self.y + 1;
+
+                self.l_cells[2].x = self.x;
+                self.l_cells[2].y = self.y + 2;
+
+                self.l_cells[3].x = self.x + 1;
+                self.l_cells[3].y = self.y + 2;
             },
         }
     }

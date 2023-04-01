@@ -219,6 +219,19 @@ pub const Game = struct {
                 var x_index = @intCast(usize, x);
                 self.cells[x_index][y_index].type = CELL_NONE;
             }
+
+            // for (&self.cells) |col| {
+            //     for (col) |row, i| {
+            //         var column = col;
+            //         var cell = row;
+
+            //         if (cell.is(CELL_BLOCK)) {
+            //             std.debug.print("CELL BLCOK ", .{});
+            //             cell.type = CELL_NONE;
+            //             column[i].type = CELL_BLOCK;
+            //         }
+            //     }
+            // }
         }
     }
 
