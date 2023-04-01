@@ -23,7 +23,7 @@ pub const Cells = [Conf.MAX_WIDTH][Conf.MAX_HEIGHT]Cell;
 pub const Game = struct {
     const Self = @This();
 
-    const TICK_RATE = 30;
+    const TICK_RATE = 60;
 
     loop_counter: u8 = 0,
 
@@ -128,14 +128,16 @@ pub const Game = struct {
     }
 
     fn move(self: *Self, x: i32, y: i32) !bool {
-        if (self.willTouchFloor(0, 1)) {
-            try self.dropCurrentBlock();
-            self.detectFilledLines();
-            self.clearFilledLines();
-            self.placePlayerBlock();
-            try self.current_block.changePlayerBlockType(BlockType.Line);
+        if (y == 1) {
+            if (self.willTouchFloor(0, 1)) {
+                try self.dropCurrentBlock();
+                self.detectFilledLines();
+                self.clearFilledLines();
+                self.placePlayerBlock();
+                try self.current_block.changePlayerBlockType(BlockType.Line);
 
-            return false;
+                return false;
+            }
         }
 
         var translate = self.canTranslateBy(x, y);
@@ -267,9 +269,9 @@ pub const Game = struct {
     fn rotate(self: *Self) void {
         self.current_block.rotate();
 
-        var intersects = self.current_block.willIntersects(CELL_WALL, 0, 0, &self.cells);
+        var intersects = self.current_block.willIntersects(CELL_WALL | CELL_BLOCK, 0, 0, &self.cells);
         if (intersects) {
-            while (self.current_block.willIntersects(CELL_WALL, 0, 0, &self.cells)) {
+            while (self.current_block.willIntersects(CELL_WALL | CELL_BLOCK, 0, 0, &self.cells)) {
                 self.current_block.rotate();
             }
         }
