@@ -153,6 +153,12 @@ pub const Game = struct {
         const center_x = @divTrunc(max_x, 2);
 
         self.current_block.setPosition(center_x, begin_y);
+
+        // Game over
+        if (self.current_block.willIntersects(CELL_BLOCK, 0, 0, &self.cells)) {
+            c.SDL_Quit();
+            std.os.exit(0);
+        }
     }
 
     fn addWalls(self: *Self) void {

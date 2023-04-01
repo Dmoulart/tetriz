@@ -190,6 +190,17 @@ pub const Block = struct {
         var positions = self.getBlockTypeCellsPositions();
         var cells = self.getShapeCells();
 
+        if (self.type == BlockType.Square) {
+            for (positions) |vec, i| {
+                var x = vec[0];
+                var y = vec[1];
+
+                cells[i].x = self.x + @floatToInt(i32, x);
+                cells[i].y = self.y + @floatToInt(i32, y);
+            }
+            return;
+        }
+
         var radians = self.angle * math.pi / 180;
         var cos = @cos(radians);
         var sin = @sin(radians);
@@ -198,20 +209,14 @@ pub const Block = struct {
             var cell_x = vec[0];
             var cell_y = vec[1];
 
-            if (self.type != BlockType.Square) {
-                var x = (cos * cell_x) - (sin * cell_y);
-                var y = (sin * cell_x) + (cos * cell_y);
+            var x = (cos * cell_x) - (sin * cell_y);
+            var y = (sin * cell_x) + (cos * cell_y);
 
-                x = @round(x);
-                y = @round(y);
+            x = @round(x);
+            y = @round(y);
 
-                cells[i].x = self.x + @floatToInt(i32, x);
-                cells[i].y = self.y + @floatToInt(i32, y);
-            } else {
-                // Don't rotate if its a square
-                cells[i].x = self.x + @floatToInt(i32, cell_x);
-                cells[i].y = self.y + @floatToInt(i32, cell_y);
-            }
+            cells[i].x = self.x + @floatToInt(i32, x);
+            cells[i].y = self.y + @floatToInt(i32, y);
         }
     }
 };
