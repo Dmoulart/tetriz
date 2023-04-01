@@ -13,6 +13,7 @@ const CELL_NONE = @import("cell.zig").CELL_NONE;
 const CELL_WALL = @import("cell.zig").CELL_WALL;
 
 pub const BlockType = enum(u8) { Square, Line };
+var R = std.rand.DefaultPrng.init(42);
 
 // const BlockCells = union { Square: [4]Cell };
 
@@ -102,10 +103,23 @@ pub const Block = struct {
         }
     }
 
-    pub fn changePlayerBlockType(self: *Self, block_type: BlockType) !void {
-        self.type = block_type;
+    pub fn changePlayerBlockType(self: *Self, _: BlockType) !void {
+        self.type = self.pickType();
         self.syncCells();
     }
+
+    pub fn pickType(self: *Self) BlockType {
+        _ = self;
+
+        var block_type = R.random().intRangeAtMost(u8, 0, 2);
+
+        switch (block_type) {
+            0 => return BlockType.Square,
+            1 => return BlockType.Line,
+            else => return BlockType.Square,
+        }
+    }
+
     fn createCells(self: *Self) !void {
         self.square_cells = [4]*Cell{
             try self.createCell(),
@@ -121,28 +135,6 @@ pub const Block = struct {
             try self.createCell(),
             try self.createCell(),
         };
-
-        // self.square_cells = undefined;
-        // self.line_cells = undefined;
-        // switch (self.type) {
-        //     .Square => {
-        //         self.square_cells = [4]*Cell{
-        //             try self.createCell(),
-        //             try self.createCell(),
-        //             try self.createCell(),
-        //             try self.createCell(),
-        //         };
-        //     },
-        //     .Line => {
-        //         self.line_cells = [5]*Cell{
-        //             try self.createCell(),
-        //             try self.createCell(),
-        //             try self.createCell(),
-        //             try self.createCell(),
-        //             try self.createCell(),
-        //         };
-        //     },
-        // }
     }
 
     fn createCell(self: *Self) !*Cell {
