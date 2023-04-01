@@ -180,9 +180,9 @@ pub const Game = struct {
 
                 if (isLeftWall or isRightWall or isBottomWall) {
                     var cell_type: u8 = if (isBottomWall) CELL_FLOOR else CELL_WALL;
-                    self.cells[x_index][y_index] = Cell{ .allocator = self.allocator, .x = @as(i32, x), .y = @as(i32, y), .type = cell_type };
+                    self.cells[x_index][y_index] = Cell{ .allocator = self.allocator, .x = @as(i32, x), .y = @as(i32, y), .type = cell_type, .color = 0xffffffff };
                 } else {
-                    self.cells[x_index][y_index] = Cell{ .allocator = self.allocator, .x = @as(i32, x), .y = @as(i32, y), .type = CELL_NONE };
+                    self.cells[x_index][y_index] = Cell{ .allocator = self.allocator, .x = @as(i32, x), .y = @as(i32, y), .type = CELL_NONE, .color = 0xffffffff };
                 }
             }
         }

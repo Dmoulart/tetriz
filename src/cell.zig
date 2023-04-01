@@ -20,6 +20,8 @@ pub const Cell = struct {
 
     type: u32 = CELL_WALL,
 
+    color: u32 = 0,
+
     pub fn init(allocator: *std.mem.Allocator) !*Cell {
         const cell = try allocator.create(Cell);
         cell.allocator = allocator;
@@ -28,7 +30,14 @@ pub const Cell = struct {
 
     pub fn render(self: *Self, renderer: *Renderer) void {
         if (self.is(CELL_WALL) or self.is(CELL_BLOCK) or self.is(CELL_FLOOR)) {
-            renderer.drawRect(self.x * Conf.CELL_SIZE, self.y * Conf.CELL_SIZE, Conf.CELL_SIZE, Conf.CELL_SIZE, 100, 100, 100, 255);
+            var color = self.color;
+            // Extract each component using bitwise operations and masks
+            var r: u8 = @intCast(u8, (color >> 24) & 0xFF); // Extract red component
+            var g: u8 = @intCast(u8, (color >> 16) & 0xFF); // Extract green component
+            var b: u8 = @intCast(u8, (color >> 8) & 0xFF); // Extract blue component
+            var a: u8 = @intCast(u8, color & 0xFF); // Extract alpha component
+
+            renderer.drawRect(self.x * Conf.CELL_SIZE, self.y * Conf.CELL_SIZE, Conf.CELL_SIZE, Conf.CELL_SIZE, r, g, b, a);
         }
     }
 

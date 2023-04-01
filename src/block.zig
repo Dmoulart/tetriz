@@ -43,9 +43,10 @@ pub const Block = struct {
         block.allocator = allocator;
         block.x = 0;
         block.y = 0;
-        block.type = block.pickType();
         block.angle = 0;
+        block.type = block.pickType();
         try block.createCells();
+        block.pickColor();
         return block;
     }
 
@@ -83,6 +84,7 @@ pub const Block = struct {
             var x_index = @intCast(usize, cell.x);
             var y_index = @intCast(usize, cell.y);
             cells[x_index][y_index].type = cell.type;
+            cells[x_index][y_index].color = cell.color;
         }
     }
 
@@ -103,6 +105,14 @@ pub const Block = struct {
     pub fn changePlayerBlockType(self: *Self, _: BlockType) !void {
         self.type = self.pickType();
         self.syncCells();
+        self.pickColor();
+    }
+
+    pub fn pickColor(self: *Self) void {
+        var cells = self.getShapeCells();
+        for (cells) |cell| {
+            cell.color = 0x0000ffff;
+        }
     }
 
     pub fn pickType(self: *Self) BlockType {
