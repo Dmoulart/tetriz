@@ -12,9 +12,9 @@ const CELL_BLOCK = @import("cell.zig").CELL_BLOCK;
 const CELL_NONE = @import("cell.zig").CELL_NONE;
 const CELL_WALL = @import("cell.zig").CELL_WALL;
 
-pub const BlockType = enum(u8) { Square };
+pub const BlockType = enum(u8) { Square, Line };
 
-const BlockCells = union { Square: [4]Cell };
+// const BlockCells = union { Square: [4]Cell };
 
 pub const Block = struct {
     const Self = @This();
@@ -24,7 +24,9 @@ pub const Block = struct {
 
     // shape: *Shape,
 
-    cells: [4]*Cell,
+    square_cells: [4]*Cell,
+
+    line_cells: [5]*Cell,
 
     x: i32,
     y: i32,
@@ -35,9 +37,6 @@ pub const Block = struct {
         block.x = 0;
         block.y = 0;
         block.type = BlockType.Square;
-        // block.shape = try allocator.create(Shape);
-        // block.shape.square = try allocator.create(SquareShape);
-        // block.shape.createCells();
         try block.createCells();
         return block;
     }
@@ -51,7 +50,12 @@ pub const Block = struct {
 
     pub fn render(self: *Self, renderer: *Renderer) void {
         if (self.type == BlockType.Square) {
-            for (self.cells) |cell| {
+            for (self.square_cells) |cell| {
+                cell.render(renderer);
+            }
+        }
+        if (self.type == BlockType.Line) {
+            for (self.line_cells) |cell| {
                 cell.render(renderer);
             }
         }
@@ -67,7 +71,15 @@ pub const Block = struct {
     pub fn willIntersects(self: *Self, flag: u8, x: i32, y: i32, cells: *Cells) bool {
         switch (self.type) {
             .Square => {
-                for (self.cells) |cell| {
+                for (self.square_cells) |cell| {
+                    if (cell.willIntersects(flag, x, y, cells)) {
+                        return true;
+                    }
+                }
+                return false;
+            },
+            .Line => {
+                for (self.line_cells) |cell| {
                     if (cell.willIntersects(flag, x, y, cells)) {
                         return true;
                     }
@@ -78,25 +90,59 @@ pub const Block = struct {
     }
 
     pub fn copyToCells(self: *Self, cells: *Cells) void {
-        for (self.cells) |cell| {
+        var shape_cells = switch (self.type) {
+            .Square => &self.square_cells,
+            .Line => &self.line_cells,
+        };
+
+        for (shape_cells) |cell| {
             var x_index = @intCast(usize, cell.x);
             var y_index = @intCast(usize, cell.y);
             cells[x_index][y_index].type = cell.type;
         }
     }
 
+    pub fn changePlayerBlockType(self: *Self, block_type: BlockType) !void {
+        self.type = block_type;
+        self.syncCells();
+    }
     fn createCells(self: *Self) !void {
-        self.cells = undefined;
-        switch (self.type) {
-            .Square => {
-                self.cells = [_]*Cell{
-                    try self.createCell(),
-                    try self.createCell(),
-                    try self.createCell(),
-                    try self.createCell(),
-                };
-            },
-        }
+        self.square_cells = [4]*Cell{
+            try self.createCell(),
+            try self.createCell(),
+            try self.createCell(),
+            try self.createCell(),
+        };
+
+        self.line_cells = [5]*Cell{
+            try self.createCell(),
+            try self.createCell(),
+            try self.createCell(),
+            try self.createCell(),
+            try self.createCell(),
+        };
+
+        // self.square_cells = undefined;
+        // self.line_cells = undefined;
+        // switch (self.type) {
+        //     .Square => {
+        //         self.square_cells = [4]*Cell{
+        //             try self.createCell(),
+        //             try self.createCell(),
+        //             try self.createCell(),
+        //             try self.createCell(),
+        //         };
+        //     },
+        //     .Line => {
+        //         self.line_cells = [5]*Cell{
+        //             try self.createCell(),
+        //             try self.createCell(),
+        //             try self.createCell(),
+        //             try self.createCell(),
+        //             try self.createCell(),
+        //         };
+        //     },
+        // }
     }
 
     fn createCell(self: *Self) !*Cell {
@@ -109,17 +155,33 @@ pub const Block = struct {
     fn syncCells(self: *Self) void {
         switch (self.type) {
             .Square => {
-                self.cells[0].x = self.x;
-                self.cells[0].y = self.y;
+                self.square_cells[0].x = self.x;
+                self.square_cells[0].y = self.y;
 
-                self.cells[1].x = self.x + 1;
-                self.cells[1].y = self.y;
+                self.square_cells[1].x = self.x + 1;
+                self.square_cells[1].y = self.y;
 
-                self.cells[2].x = self.x + 1;
-                self.cells[2].y = self.y + 1;
+                self.square_cells[2].x = self.x + 1;
+                self.square_cells[2].y = self.y + 1;
 
-                self.cells[3].x = self.x;
-                self.cells[3].y = self.y + 1;
+                self.square_cells[3].x = self.x;
+                self.square_cells[3].y = self.y + 1;
+            },
+            .Line => {
+                self.line_cells[0].x = self.x;
+                self.line_cells[0].y = self.y;
+
+                self.line_cells[1].x = self.x;
+                self.line_cells[1].y = self.y + 1;
+
+                self.line_cells[2].x = self.x;
+                self.line_cells[2].y = self.y + 2;
+
+                self.line_cells[3].x = self.x;
+                self.line_cells[3].y = self.y + 3;
+
+                self.line_cells[4].x = self.x;
+                self.line_cells[4].y = self.y + 4;
             },
         }
     }

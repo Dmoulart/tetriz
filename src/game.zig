@@ -7,7 +7,8 @@ const Renderer = @import("lib/renderer.zig").Renderer;
 const Input = @import("lib/input.zig").Input;
 
 const Cell = @import("cell.zig").Cell;
-const CellType = @import("cell.zig").CellType;
+const BlockType = @import("block.zig").BlockType;
+
 const CELL_BLOCK = @import("cell.zig").CELL_BLOCK;
 const CELL_NONE = @import("cell.zig").CELL_NONE;
 const CELL_WALL = @import("cell.zig").CELL_WALL;
@@ -123,6 +124,7 @@ pub const Game = struct {
             self.detectFilledLines();
             self.clearFilledLines();
             self.placePlayerBlock();
+            try self.current_block.changePlayerBlockType(BlockType.Line);
 
             return;
         }
