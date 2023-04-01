@@ -83,19 +83,22 @@ pub const Game = struct {
     fn processInput(self: *Self, sym: c_int) !void {
         switch (sym) {
             c.SDLK_LEFT => {
-                try self.move(-1, 0);
+                _ = try self.move(-1, 0);
             },
             c.SDLK_RIGHT => {
-                try self.move(1, 0);
+                _ = try self.move(1, 0);
             },
             c.SDLK_DOWN => {
-                try self.move(0, 1);
+                _ = try self.move(0, 1);
             },
             c.SDLK_a => {
                 self.rotate();
             },
             c.SDLK_UP => {
                 self.rotate();
+            },
+            c.SDLK_SPACE => {
+                self.drop();
             },
             else => {},
         }
@@ -113,7 +116,7 @@ pub const Game = struct {
     }
 
     fn tick(self: *Self) !void {
-        try self.move(0, 1);
+        _ = try self.move(0, 1);
     }
 
     fn canTranslateBy(self: *Self, x: i32, y: i32) bool {
@@ -124,7 +127,7 @@ pub const Game = struct {
         return self.current_block.willIntersects(CELL_FLOOR | CELL_BLOCK, x, y, &self.cells);
     }
 
-    fn move(self: *Self, x: i32, y: i32) !void {
+    fn move(self: *Self, x: i32, y: i32) !bool {
         if (self.willTouchFloor(0, 1)) {
             try self.dropCurrentBlock();
             self.detectFilledLines();
@@ -132,13 +135,15 @@ pub const Game = struct {
             self.placePlayerBlock();
             try self.current_block.changePlayerBlockType(BlockType.Line);
 
-            return;
+            return false;
         }
 
         var translate = self.canTranslateBy(x, y);
         if (translate) {
             self.current_block.translate(x, y);
+            return true;
         }
+        return false;
     }
 
     fn dropCurrentBlock(self: *Self) !void {
@@ -237,7 +242,6 @@ pub const Game = struct {
     }
 
     fn lowerAllBocksCells(self: *Self, from: usize) void {
-        // var y: i32 = self.wallsYEnd() - 1;
         var y = from;
 
         while (y > self.wallsYBegin()) : (y -= 1) {
@@ -249,9 +253,11 @@ pub const Game = struct {
                 x_index = @intCast(usize, x);
 
                 if (self.cells[x_index][y_index].type & CELL_BLOCK == CELL_BLOCK) {
+                    var color = self.cells[x_index][y_index].color;
                     self.cells[x_index][y_index].type = CELL_NONE;
                     if (y_index + 1 <= self.cells[x_index].len) {
                         self.cells[x_index][y_index + 1].type = CELL_BLOCK;
+                        self.cells[x_index][y_index + 1].color = color;
                     }
                 }
             }
@@ -267,6 +273,10 @@ pub const Game = struct {
                 self.current_block.rotate();
             }
         }
+    }
+
+    fn drop(self: *Self) void {
+        while (try self.move(0, 1)) {}
     }
 
     fn wallsXBegin(self: *Self) i32 {
