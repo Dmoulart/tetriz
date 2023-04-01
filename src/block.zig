@@ -12,7 +12,7 @@ const CELL_BLOCK = @import("cell.zig").CELL_BLOCK;
 const CELL_NONE = @import("cell.zig").CELL_NONE;
 const CELL_WALL = @import("cell.zig").CELL_WALL;
 
-pub const BlockType = enum(u8) { Square, Line, L };
+pub const BlockType = enum(u8) { Square, Line, L, T };
 var R = std.rand.DefaultPrng.init(2);
 
 pub const Block = struct {
@@ -24,6 +24,7 @@ pub const Block = struct {
     square_cells: [4]*Cell,
     line_cells: [5]*Cell,
     l_cells: [4]*Cell,
+    t_cells: [4]*Cell,
 
     x: i32,
     y: i32,
@@ -80,6 +81,7 @@ pub const Block = struct {
             .Square => &self.square_cells,
             .Line => &self.line_cells,
             .L => &self.l_cells,
+            .T => &self.t_cells,
         };
     }
 
@@ -96,7 +98,8 @@ pub const Block = struct {
         var block_type = switch (random_block_type) {
             0 => BlockType.Square,
             1 => BlockType.Line,
-            2 => BlockType.Line,
+            2 => BlockType.L,
+            3 => BlockType.T,
             else => BlockType.Square,
         };
 
@@ -122,6 +125,13 @@ pub const Block = struct {
         };
 
         self.l_cells = [4]*Cell{
+            try self.createCell(),
+            try self.createCell(),
+            try self.createCell(),
+            try self.createCell(),
+        };
+
+        self.t_cells = [4]*Cell{
             try self.createCell(),
             try self.createCell(),
             try self.createCell(),
@@ -179,6 +189,19 @@ pub const Block = struct {
 
                 self.l_cells[3].x = self.x + 1;
                 self.l_cells[3].y = self.y + 2;
+            },
+            .T => {
+                self.t_cells[0].x = self.x;
+                self.t_cells[0].y = self.y;
+
+                self.t_cells[1].x = self.x + 1;
+                self.t_cells[1].y = self.y;
+
+                self.t_cells[2].x = self.x + 1;
+                self.t_cells[2].y = self.y + 1;
+
+                self.t_cells[3].x = self.x + 2;
+                self.t_cells[3].y = self.y;
             },
         }
     }
