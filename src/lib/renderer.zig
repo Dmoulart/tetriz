@@ -30,7 +30,7 @@ pub const Renderer = struct {
         return renderer;
     }
 
-    pub fn drawRect(self: *Self, x: i32, y: i32, w: i32, h: i32, r: u8, g: u8, b: u8, a: u8) void {
+    pub fn strokeRect(self: *Self, x: i32, y: i32, w: i32, h: i32, r: u8, g: u8, b: u8, a: u8) void {
         _ = c.SDL_SetRenderDrawColor(self.sdl_renderer, r, g, b, a);
 
         self.sdl_rect.w = @intCast(c_int, w);
@@ -40,6 +40,18 @@ pub const Renderer = struct {
         self.sdl_rect.y = @intCast(c_int, y);
 
         _ = c.SDL_RenderDrawRect(self.sdl_renderer, &self.sdl_rect);
+    }
+
+    pub fn fillRect(self: *Self, x: i32, y: i32, w: i32, h: i32, r: u8, g: u8, b: u8, a: u8) void {
+        _ = c.SDL_SetRenderDrawColor(self.sdl_renderer, r, g, b, a);
+
+        self.sdl_rect.w = @intCast(c_int, w);
+        self.sdl_rect.h = @intCast(c_int, h);
+
+        self.sdl_rect.x = @intCast(c_int, x);
+        self.sdl_rect.y = @intCast(c_int, y);
+
+        _ = c.SDL_RenderFillRect(self.sdl_renderer, &self.sdl_rect);
     }
 
     pub fn clear(self: *Self) void {

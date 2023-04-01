@@ -37,7 +37,8 @@ pub const Cell = struct {
             var b: u8 = @intCast(u8, (color >> 8) & 0xFF); // Extract blue component
             var a: u8 = @intCast(u8, color & 0xFF); // Extract alpha component
 
-            renderer.drawRect(self.x * Conf.CELL_SIZE, self.y * Conf.CELL_SIZE, Conf.CELL_SIZE, Conf.CELL_SIZE, r, g, b, a);
+            renderer.fillRect(self.x * Conf.CELL_SIZE, self.y * Conf.CELL_SIZE, Conf.CELL_SIZE, Conf.CELL_SIZE, r, g, b, a);
+            renderer.strokeRect(self.x * Conf.CELL_SIZE, self.y * Conf.CELL_SIZE, Conf.CELL_SIZE, Conf.CELL_SIZE, 0, 0, 0, a);
         }
     }
 
