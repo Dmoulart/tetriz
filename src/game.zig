@@ -44,9 +44,11 @@ pub const Game = struct {
 
     pub fn init(allocator: *std.mem.Allocator) !*Game {
         var game = try allocator.create(Game);
-        game.allocator = allocator;
 
+        game.allocator = allocator;
         game.loop_counter = 0;
+        game.score = 0;
+
         return game;
     }
 

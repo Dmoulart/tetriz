@@ -63,44 +63,24 @@ pub const Renderer = struct {
     }
 
     pub fn drawText(self: *Self, x: c_int, y: c_int, score: u32) void {
-        // Init fonts
-        // _ = c.TTF_Init();
 
         //this opens a font style and sets a size
         const Sans: ?*c.TTF_Font = c.TTF_OpenFont("04B_19__.ttf", 124);
 
-        // this is the color in rgb format,
-        // maxing out all would give you the color white,
-        // and it will be your text's color
-        // var white: c.SDL_Color = undefined;
-        // white.r = 255;
-        // white.g = 255;
-        // white.b = 255;
-
-        var white = .{ .r = 255, .g = 255, .b = 255, .a = 1 };
+        var white = .{ .r = 255, .g = 255, .b = 255, .a = 255 };
         _ = white;
-
-        // const allocator = std.heap.page_allocator;
-        // // _ = allocator;
-
-        // var str = std.fmt.allocPrint(allocator, "{}", .{score}) catch "format failed";
-        // std.debug.print("\nstr {s}", .{str});
-        // var c_str = @ptrCast([*c]const u8, &str);
-
-        // std.debug.print("\nc_str {s}", .{c_str});
-        // _ = str;
 
         var buffer: [100]u8 = undefined;
         const buf = buffer[0..];
 
-        const str = std.fmt.bufPrintIntToSlice(buf, @as(u32, score), 10, .lower, std.fmt.FormatOptions{});
+        const str = std.fmt.bufPrintIntToSlice(buf, score, 10, .lower, std.fmt.FormatOptions{});
 
-        const c_str = @ptrCast([*c]const u8, str);
-        std.debug.print("str {s}", .{c_str});
-        // as TTF_RenderText_Solid could only be used on
-        // SDL_Surface then you have to create the surface first
+        var str_ptr = @ptrCast([*c]const u8, &str);
+
+        std.debug.print("\n str_ptr {*}", .{str_ptr});
+
         var surfaceMessage =
-            c.TTF_RenderText_Solid(Sans, c_str, .{ .r = 100, .g = 100, .b = 100, .a = 255 });
+            c.TTF_RenderText_Solid(Sans, str_ptr, .{ .r = 100, .g = 100, .b = 100, .a = 255 });
 
         // std.fmt.bufPrint(buf: []u8, comptime fmt: []const u8, args: anytype)
 
