@@ -150,7 +150,7 @@ pub const Block = struct {
 
     pub fn pickType(self: *Self) BlockType {
         var blocks_len = @intCast(u8, @typeInfo(BlockType).Enum.fields.len);
-        var random_block_type = self.getRandom().random().intRangeAtMost(u8, 0, blocks_len);
+        var random_block_type = self.getRandom().random().intRangeAtMost(u8, 0, blocks_len - 1);
 
         var block_type = switch (random_block_type) {
             0 => BlockType.Square,
@@ -158,7 +158,7 @@ pub const Block = struct {
             2 => BlockType.L,
             3 => BlockType.T,
             4 => BlockType.S,
-            else => BlockType.Square,
+            else => unreachable,
         };
 
         return block_type;

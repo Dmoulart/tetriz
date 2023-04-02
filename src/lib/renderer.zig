@@ -16,6 +16,10 @@ pub const Renderer = struct {
     sdl_window: *c.SDL_Window = undefined,
     sdl_rect: c.SDL_Rect = undefined,
 
+    var buffer: [100]u8 = undefined;
+    const buf = buffer[0..];
+    var score_str: []u8 = undefined;
+
     pub fn init(options: RendererOptions) !*Renderer {
         var renderer = try options.allocator.create(Renderer);
 
@@ -70,19 +74,12 @@ pub const Renderer = struct {
         var white = .{ .r = 255, .g = 255, .b = 255, .a = 255 };
         _ = white;
 
-        var buffer: [100]u8 = undefined;
-        const buf = buffer[0..];
+        score_str = std.fmt.bufPrintIntToSlice(buf, score, 10, .lower, std.fmt.FormatOptions{});
 
-        const str = std.fmt.bufPrintIntToSlice(buf, score, 10, .lower, std.fmt.FormatOptions{});
-
-        var str_ptr = @ptrCast([*c]const u8, &str);
-
-        std.debug.print("\n str_ptr {*}", .{str_ptr});
+        std.debug.print("\n score {s}", .{score_str});
 
         var surfaceMessage =
-            c.TTF_RenderText_Solid(Sans, str_ptr, .{ .r = 100, .g = 100, .b = 100, .a = 255 });
-
-        // std.fmt.bufPrint(buf: []u8, comptime fmt: []const u8, args: anytype)
+            c.TTF_RenderText_Solid(Sans, score_str.ptr, .{ .r = 100, .g = 100, .b = 100, .a = 255 });
 
         // now you can convert it into a texture
         var message = c.SDL_CreateTextureFromSurface(self.sdl_renderer, surfaceMessage);
@@ -107,8 +104,8 @@ pub const Renderer = struct {
         _ = c.SDL_RenderCopy(self.sdl_renderer, message, null, &message_rect);
 
         // Don't forget to free your surface and texture
-        // c.SDL_FreeSurface(surfaceMessage);
-        // c.SDL_DestroyTexture(message);
+        c.SDL_FreeSurface(surfaceMessage);
+        c.SDL_DestroyTexture(message);
     }
 
     pub fn clear(self: *Self) void {
