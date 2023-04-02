@@ -15,7 +15,8 @@ pub fn build(b: *std.build.Builder) void {
     exe.setTarget(target);
     exe.setBuildMode(mode);
     exe.linkSystemLibrary("SDL2"); // Added
-    exe.linkSystemLibrary("sdl_ttf"); // Added
+    // @cInclude("/opt/homebrew/Cellar/sdl_ttf/2.0.11_2/include/sdl/SDL_ttf.h");
+    exe.linkSystemLibrary("sdl2_ttf"); // Added
     exe.install();
 
     const run_cmd = exe.run();

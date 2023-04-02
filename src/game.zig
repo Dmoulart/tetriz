@@ -1,6 +1,8 @@
 const std = @import("std");
 const c = @cImport({
     @cInclude("SDL2/SDL.h");
+    // @cInclude("/opt/homebrew/Cellar/sdl_ttf/2.0.11_2/include/sdl/SDL_ttf.h");
+    @cInclude("/opt/homebrew/Cellar/sdl2_ttf/2.20.2/include/SDL2/SDL_ttf.h");
 });
 
 const Renderer = @import("lib/renderer.zig").Renderer;
