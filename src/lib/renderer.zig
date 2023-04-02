@@ -56,6 +56,47 @@ pub const Renderer = struct {
         _ = c.SDL_RenderFillRect(self.sdl_renderer, &self.sdl_rect);
     }
 
+    pub fn drawText(self: *Self) void {
+        //this opens a font style and sets a size
+        var Sans: c.TTF_Font = c.TTF_OpenFont("SIXTY.ttf", 24);
+
+        // this is the color in rgb format,
+        // maxing out all would give you the color white,
+        // and it will be your text's color
+        var white: c.SDL_Color = .{ 255, 255, 255 };
+
+        // as TTF_RenderText_Solid could only be used on
+        // SDL_Surface then you have to create the surface first
+        var surfaceMessage: c.SDL_Surface =
+            c.TTF_RenderText_Solid(Sans, "put your text here", white);
+
+        // now you can convert it into a texture
+        var message: c.SDL_Texture = c.SDL_CreateTextureFromSurface(self.sdl_renderer, surfaceMessage);
+
+        var message_rect: c.SDL_Rect = undefined; //create a rect
+        message_rect.x = 0; //controls the rect's x coordinate
+        message_rect.y = 0; // controls the rect's y coordinte
+        message_rect.w = 100; // controls the width of the rect
+        message_rect.h = 100; // controls the height of the rect
+
+        // (0,0) is on the top left of the window/screen,
+        // think a rect as the text's box,
+        // that way it would be very simple to understand
+
+        // Now since it's a texture, you have to put RenderCopy
+        // in your game loop area, the area where the whole code executes
+
+        // you put the renderer's name first, the Message,
+        // the crop size (you can ignore this if you don't want
+        // to dabble with cropping), and the rect which is the size
+        // and coordinate of your texture
+        c.SDL_RenderCopy(self.sdl_renderer, message, null, &message_rect);
+
+        // Don't forget to free your surface and texture
+        c.SDL_FreeSurface(surfaceMessage);
+        c.SDL_DestroyTexture(message);
+    }
+
     pub fn clear(self: *Self) void {
         _ = c.SDL_SetRenderDrawColor(self.sdl_renderer, 0, 0, 0, 255);
         _ = c.SDL_RenderClear(self.sdl_renderer);

@@ -38,6 +38,8 @@ pub const Game = struct {
 
     filled_lines: [Conf.MAX_HEIGHT]bool = undefined,
 
+    score: u32 = 0,
+
     pub fn init(allocator: *std.mem.Allocator) !*Game {
         var game = try allocator.create(Game);
         game.allocator = allocator;
@@ -74,6 +76,8 @@ pub const Game = struct {
         try self.processInput(Input.getPressedKey());
 
         try self.render();
+
+        self.renderer.drawText();
 
         c.SDL_Delay(16);
 
@@ -247,6 +251,8 @@ pub const Game = struct {
             }
 
             self.lowerAllBocksCells(y_index);
+
+            self.score += 1;
         }
     }
 
