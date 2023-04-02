@@ -79,8 +79,6 @@ pub const Game = struct {
 
         try self.render();
 
-        self.renderer.drawText();
-
         c.SDL_Delay(16);
 
         self.loop_counter += 1;
@@ -123,7 +121,13 @@ pub const Game = struct {
         }
 
         self.current_block.render(self.renderer);
+
         try self.current_block.renderProjection(&self.cells, self.renderer);
+
+        var textX = @intCast(c_int, self.wallsXEnd() + 20);
+        var textY = @intCast(c_int, self.wallsYBegin() + 20);
+
+        self.renderer.drawText(textX, textY, self.score);
 
         self.renderer.render();
     }
