@@ -7,6 +7,7 @@ const Renderer = @import("lib/renderer.zig").Renderer;
 const Input = @import("lib/input.zig").Input;
 const Cell = @import("cell.zig").Cell;
 const Game = @import("game.zig").Game;
+const Score = @import("score.zig");
 
 const Conf = @import("conf.zig");
 
@@ -26,8 +27,6 @@ pub fn main() anyerror!void {
     var renderer = try Renderer.init(.{ .allocator = allocator, .title = "Tetriz", .x = 0, .y = 0, .w = Conf.SCREEN_WIDTH, .h = Conf.SCREEN_HEIGHT, .flags = c.SDL_WINDOW_SHOWN });
     defer renderer.deinit();
 
-    var game_over = false;
-
     const game = try Game.init(allocator);
 
     game.setRenderer(renderer);
@@ -35,13 +34,14 @@ pub fn main() anyerror!void {
 
     _ = try game.createPlayerBlock();
 
-    while (!game_over) {
+    while (!game.game_over) {
         try game.update();
     }
 
-    try game.writeScore();
+    try Score.write(game.score);
 }
 
 fn quit() void {
     c.SDL_Quit();
+    std.os.exit(0);
 }

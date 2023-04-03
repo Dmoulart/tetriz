@@ -42,6 +42,8 @@ pub const Game = struct {
 
     score: u32 = 0,
 
+    game_over: bool = false,
+
     pub fn init(allocator: *std.mem.Allocator) !*Game {
         var game = try allocator.create(Game);
 
@@ -55,7 +57,7 @@ pub const Game = struct {
     pub fn createPlayerBlock(self: *Self) !*Block {
         self.current_block = try Block.init(self.allocator);
 
-        self.placePlayerBlock();
+        _ = self.placePlayerBlock();
 
         return self.current_block;
     }
@@ -88,18 +90,6 @@ pub const Game = struct {
         if (self.loop_counter % 1000 == 1) {
             TICK_RATE -= 1;
         }
-    }
-
-    pub fn writeScore(self: *Self) !void {
-        const file = try std.fs.cwd().createFile("score.txt", .{});
-        defer file.close();
-
-        var buffer: [100]u8 = undefined;
-        const buf = buffer[0..];
-        var score_str = std.fmt.bufPrintIntToSlice(buf, self.score, 10, .lower, std.fmt.FormatOptions{});
-        _ = score_str;
-        const bytes_written = try file.writeAll("hello");
-        _ = bytes_written;
     }
 
     fn processInput(self: *Self, sym: c_int) !void {
@@ -164,7 +154,11 @@ pub const Game = struct {
                 try self.dropCurrentBlock();
                 self.detectFilledLines();
                 self.clearFilledLines();
-                self.placePlayerBlock();
+                // If can't place player block let's set game over
+                if (!self.placePlayerBlock()) {
+                    self.game_over = true;
+                }
+
                 try self.current_block.changePlayerBlockType(BlockType.Line);
 
                 return false;
@@ -183,7 +177,7 @@ pub const Game = struct {
         self.current_block.copyToCells(&self.cells);
     }
 
-    fn placePlayerBlock(self: *Self) void {
+    fn placePlayerBlock(self: *Self) bool {
         const max_x = self.maxWidth();
         const max_y = self.maxHeight();
 
@@ -193,10 +187,7 @@ pub const Game = struct {
         self.current_block.setPosition(center_x, begin_y);
 
         // Game over
-        if (self.current_block.willIntersects(CELL_BLOCK, 0, 0, &self.cells)) {
-            c.SDL_Quit();
-            std.os.exit(0);
-        }
+        return !self.current_block.willIntersects(CELL_BLOCK, 0, 0, &self.cells);
     }
 
     fn addWalls(self: *Self) void {
