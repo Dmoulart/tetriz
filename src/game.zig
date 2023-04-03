@@ -90,6 +90,18 @@ pub const Game = struct {
         }
     }
 
+    pub fn writeScore(self: *Self) !void {
+        const file = try std.fs.cwd().createFile("score.txt", .{});
+        defer file.close();
+
+        var buffer: [100]u8 = undefined;
+        const buf = buffer[0..];
+        var score_str = std.fmt.bufPrintIntToSlice(buf, self.score, 10, .lower, std.fmt.FormatOptions{});
+        _ = score_str;
+        const bytes_written = try file.writeAll("hello");
+        _ = bytes_written;
+    }
+
     fn processInput(self: *Self, sym: c_int) !void {
         switch (sym) {
             c.SDLK_LEFT => {

@@ -38,6 +38,8 @@ pub fn main() anyerror!void {
     while (!game_over) {
         try game.update();
     }
+
+    try game.writeScore();
 }
 
 fn quit() void {
