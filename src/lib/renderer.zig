@@ -1,7 +1,7 @@
 const std = @import("std");
 const c = @cImport({
-    @cInclude("SDL2/SDL.h");
-    @cInclude("SDL2/SDL_ttf.h");
+    @cInclude("SDL.h");
+    @cInclude("SDL_ttf.h");
 });
 
 pub const RendererOptions = struct { title: [*c]const u8, x: u16 = 0, y: u16 = 0, w: u16 = 600, h: u16 = 400, flags: u32 = c.SDL_WINDOW_SHOWN, allocator: *std.mem.Allocator };

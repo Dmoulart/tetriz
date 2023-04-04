@@ -1,7 +1,7 @@
 const std = @import("std");
-const c = @cImport({
-    @cInclude("SDL2/SDL.h");
-    @cInclude("SDL2/SDL_ttf.h");
+pub const c = @cImport({
+    @cInclude("SDL.h");
+    @cInclude("SDL_ttf.h");
 });
 
 const Renderer = @import("lib/renderer.zig").Renderer;
