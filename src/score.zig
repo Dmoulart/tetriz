@@ -4,7 +4,7 @@ const File = std.fs.File;
 const cwd = fs.cwd();
 
 pub fn write(score: u32, alloc: *std.mem.Allocator) !void {
-    // _ = score;
+    // Open/create file
     var file: File = undefined;
     defer file.close();
 
@@ -15,6 +15,7 @@ pub fn write(score: u32, alloc: *std.mem.Allocator) !void {
         file = try std.fs.cwd().createFile("score.txt", .{});
     }
 
+    // Convert the score to a string
     var buffer: [100]u8 = undefined;
     const buf = buffer[0..];
     var score_str = std.fmt.bufPrintIntToSlice(buf, score, 10, .lower, std.fmt.FormatOptions{});
