@@ -6,6 +6,7 @@ pub fn build(b: *std.build.Builder) void {
     exe.setBuildMode(mode);
 
     exe.linkLibC();
+
     exe.linkSystemLibrary("SDL2");
     exe.linkSystemLibrary("sdl2_ttf"); // Added
     exe.linkSystemLibrary("c");

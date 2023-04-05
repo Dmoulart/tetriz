@@ -5,16 +5,14 @@ const cwd = fs.cwd();
 
 pub fn write(score: u32) !void {
     _ = score;
-    var file = std.fs.cwd().openFile("score.txt", .{}) catch |err| switch (err) {
-        // err.OpenError => {
-        //     _ = try std.fs.cwd().createFile("score.txt", .{});
-        //     return try std.fs.cwd().openFile("score.txt", .{});
-        // },
-        else => {
-            _ = try std.fs.cwd().createFile("score.txt", .{});
-            return std.fs.cwd().openFile("score.txt", .{});
-        },
-    };
+    var file = std.fs.cwd().openFile("score.txt", .{});
+    //  catch |err| {
+    //     std.debug.print("{}", .{err});
+    //     _ = try std.fs.cwd().openFile("score.txt", .{});
+    //     file = try std.fs.cwd().createFile("score.txt", .{});
+    //     return new_file;
+    // };
+
     _ = file;
 
     // catch {
