@@ -66,12 +66,8 @@ pub const Renderer = struct {
     }
 
     pub fn drawText(self: *Self, x: c_int, y: c_int, score: u32) void {
-
         //this opens a font style and sets a size
         const Sans: ?*c.TTF_Font = c.TTF_OpenFont("04B_19__.ttf", 124);
-
-        var white = .{ .r = 255, .g = 255, .b = 255, .a = 255 };
-        _ = white;
 
         score_str = std.fmt.bufPrintIntToSlice(buf, score, 10, .lower, std.fmt.FormatOptions{});
 
@@ -83,11 +79,10 @@ pub const Renderer = struct {
         // now you can convert it into a texture
         var message = c.SDL_CreateTextureFromSurface(self.sdl_renderer, surfaceMessage);
 
-        var message_rect: c.SDL_Rect = undefined; //create a rect
-        message_rect.x = x; //controls the rect's x coordinate
-        message_rect.y = y; // controls the rect's y coordinte
-        message_rect.w = 100; // controls the width of the rect
-        message_rect.h = 100; // controls the height of the rect
+        self.sdl_rect.x = x; //controls the rect's x coordinate
+        self.sdl_rect.y = y; // controls the rect's y coordinte
+        self.sdl_rect.w = 100; // controls the width of the rect
+        self.sdl_rect.h = 100; // controls the height of the rect
 
         // (0,0) is on the top left of the window/screen,
         // think a rect as the text's box,
@@ -100,7 +95,7 @@ pub const Renderer = struct {
         // the crop size (you can ignore this if you don't want
         // to dabble with cropping), and the rect which is the size
         // and coordinate of your texture
-        _ = c.SDL_RenderCopy(self.sdl_renderer, message, null, &message_rect);
+        _ = c.SDL_RenderCopy(self.sdl_renderer, message, null, &self.sdl_rect);
 
         // Don't forget to free your surface and texture
         c.SDL_FreeSurface(surfaceMessage);
