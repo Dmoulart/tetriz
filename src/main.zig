@@ -38,7 +38,7 @@ pub fn main() anyerror!void {
         try game.update();
     }
 
-    try Score.write(game.score);
+    try Score.write(game.score, allocator);
 }
 
 fn quit() void {

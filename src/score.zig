@@ -3,51 +3,29 @@ const fs = std.fs;
 const File = std.fs.File;
 const cwd = fs.cwd();
 
-pub fn write(score: u32) !void {
-    _ = score;
-    var file = std.fs.cwd().openFile("score.txt", .{});
-    //  catch |err| {
-    //     std.debug.print("{}", .{err});
-    //     _ = try std.fs.cwd().openFile("score.txt", .{});
-    //     file = try std.fs.cwd().createFile("score.txt", .{});
-    //     return new_file;
-    // };
+pub fn write(score: u32, alloc: *std.mem.Allocator) !void {
+    // _ = score;
+    var file: File = undefined;
+    defer file.close();
 
-    _ = file;
+    if (std.fs.cwd().openFile("score.txt", .{ .mode = .read_write })) |opened_file| {
+        file = opened_file;
+    } else |err| {
+        std.debug.print("Creating file {}", .{err});
+        file = try std.fs.cwd().createFile("score.txt", .{});
+    }
 
-    // catch {
-    //     _ = try std.fs.cwd().createFile("score.txt", .{});
-    //     return try std.fs.cwd().openFile("score.txt", .{});
-    // };
-    // defer file.close();
+    var buffer: [100]u8 = undefined;
+    const buf = buffer[0..];
+    var score_str = std.fmt.bufPrintIntToSlice(buf, score, 10, .lower, std.fmt.FormatOptions{});
+    var stat = try file.stat();
+    try file.seekTo(stat.size);
 
-    // var stat = try file.stat();
-    // try file.seekTo(stat.size);
+    // Concatenate linefeed
+    var lf = "\n";
+    var line = try alloc.alloc(u8, score_str.len + lf.len);
+    std.mem.copy(u8, line[0..], score_str);
+    std.mem.copy(u8, line[score_str.len..], lf);
 
-    // var buffer: [100]u8 = undefined;
-    // const buf = buffer[0..];
-    // var score_str = std.fmt.bufPrintIntToSlice(buf, score, 10, .lower, std.fmt.FormatOptions{});
-
-    // try file.writer().writeAll(score_str);
-
-    // var buf_reader = std.io.bufferedReader(file.reader());
-    // var in_stream = buf_reader.reader();
-
-    // var buf: [1024]u8 = undefined;
-    // while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) {
-    //     // do something with line...
-    // }
-
-    // var stat: fs.Dir.Stat = cwd().stat();
-    // _ = stat;
-    // stat.kind
-
-    // const file = try std.fs.cwd().createFile("score.txt", .{ .read = true });
-    // defer file.close();
-    // std.debug.print("file created", .{});
-    // var buffer: [100]u8 = undefined;
-    // const buf = buffer[0..];
-    // var score_str = std.fmt.bufPrintIntToSlice(buf, score, 10, .lower, std.fmt.FormatOptions{});
-    // const bytes_written = try file.writeAll(score_str);
-    // _ = bytes_written;
+    try file.writer().writeAll(line); // this will happen at the end of the file
 }
