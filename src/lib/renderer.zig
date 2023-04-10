@@ -15,9 +15,9 @@ pub const Renderer = struct {
     sdl_window: *c.SDL_Window = undefined,
     sdl_rect: c.SDL_Rect = undefined,
 
-    var buffer: [100]u8 = undefined;
-    const buf = buffer[0..];
-    var score_str: []u8 = undefined;
+    font: ?*c.TTF_Font = undefined,
+
+
 
     pub fn init(options: RendererOptions) !*Renderer {
         var renderer = try options.allocator.create(Renderer);
@@ -35,6 +35,8 @@ pub const Renderer = struct {
         renderer.sdl_renderer = c.SDL_CreateRenderer(renderer.sdl_window, 0, 0) orelse unreachable;
 
         renderer.sdl_rect = c.SDL_Rect{ .x = @intCast(c_int, 0), .y = @intCast(c_int, 0), .w = 10, .h = 10 };
+
+        renderer.font = c.TTF_OpenFont("04B_19__.ttf", 124);
 
         _ = c.SDL_SetRenderDrawBlendMode(renderer.sdl_renderer, c.SDL_BLENDMODE_BLEND);
 
@@ -65,16 +67,11 @@ pub const Renderer = struct {
         _ = c.SDL_RenderFillRect(self.sdl_renderer, &self.sdl_rect);
     }
 
-    pub fn drawText(self: *Self, x: c_int, y: c_int, score: u32) void {
-        //this opens a font style and sets a size
-        const Sans: ?*c.TTF_Font = c.TTF_OpenFont("04B_19__.ttf", 124);
-
-        score_str = std.fmt.bufPrintIntToSlice(buf, score, 10, .lower, std.fmt.FormatOptions{});
-
-        std.debug.print("\n score {s}", .{score_str});
+    pub fn drawText(self: *Self, x: c_int, y: c_int, text: []u8) void {
+        std.debug.print("\n score {s}", .{text});
 
         var surfaceMessage =
-            c.TTF_RenderText_Solid(Sans, score_str.ptr, .{ .r = 100, .g = 100, .b = 100, .a = 255 });
+            c.TTF_RenderText_Solid(self.font, text.ptr, .{ .r = 100, .g = 100, .b = 100, .a = 255 });
 
         // now you can convert it into a texture
         var message = c.SDL_CreateTextureFromSurface(self.sdl_renderer, surfaceMessage);

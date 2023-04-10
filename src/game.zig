@@ -43,6 +43,9 @@ pub const Game = struct {
 
     game_over: bool = false,
 
+    var str_buffer: [100]u8 = undefined;
+    const str_buffer_slice = str_buffer[0..];
+
     pub fn init(allocator: *std.mem.Allocator) !*Game {
         var game = try allocator.create(Game);
 
@@ -130,7 +133,8 @@ pub const Game = struct {
         var textX = @intCast(c_int, self.wallsXEnd() + 20);
         var textY = @intCast(c_int, self.wallsYBegin() + 20);
 
-        self.renderer.drawText(textX, textY, self.score);
+        var score_str = std.fmt.bufPrintIntToSlice(str_buffer_slice, self.score, 10, .lower, std.fmt.FormatOptions{});
+        self.renderer.drawText(textX, textY, score_str);
 
         self.renderer.render();
     }
