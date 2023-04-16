@@ -16,19 +16,22 @@ const CELL_NONE = @import("cell.zig").CELL_NONE;
 const CELL_WALL = @import("cell.zig").CELL_WALL;
 const CELL_FLOOR = @import("cell.zig").CELL_FLOOR;
 
-const COLORS = [_]u32{ 0x227C9DFF, 0x17C3B2FF, 0xFFCB77FF, 0xFE6D73FF };
+// const COLORS = [_]u32{ 0x227C9DFF, 0x17C3B2FF, 0xFFCB77FF, 0xFE6D73FF };
+const COLORS = [_]u32{ 0x847996FF, 0x88B7B5FF, 0xA7CAB1FF, 0xF4ECD6FF, 0x9DD1F1FF, 0x508AA8FF, 0xF397D6FF, 0xDD7373, 0xBCFFDBFF, 0x647AA3FF, 0xFC60A8FF, 0xF4B393FF, 0x63A375FF };
 
-pub const BlockType = enum(u8) { Square, Line, L, T, S };
+pub const BlockType = enum(u8) { Square, Line, L, T, S, Z, J };
 
 var SQUARE_CELLS_POS = [_][2]f16{ [_]f16{ 0, 0 }, [_]f16{ 1, 0 }, [_]f16{ 1, 1 }, [_]f16{ 0, 1 } };
 
 var LINE_CELLS_POS = [_][2]f16{ [_]f16{ 0, -2 }, [_]f16{ 0, -1 }, [_]f16{ 0, 0 }, [_]f16{ 0, 1 }, [_]f16{ 0, 2 } };
 
 var L_CELLS_POS = [_][2]f16{ [_]f16{ 0, -1 }, [_]f16{ 0, 0 }, [_]f16{ 0, 1 }, [_]f16{ 1, 1 } };
+var J_CELLS_POS = [_][2]f16{ [_]f16{ 0, -1 }, [_]f16{ 0, 0 }, [_]f16{ 0, 1 }, [_]f16{ -1, 1 } };
 
 var T_CELLS_POS = [_][2]f16{ [_]f16{ -1, 0 }, [_]f16{ 0, 0 }, [_]f16{ 0, 1 }, [_]f16{ 1, 0 } };
 
 var S_CELLS_POS = [_][2]f16{ [_]f16{ -1, -1 }, [_]f16{ -1, 0 }, [_]f16{ 0, 0 }, [_]f16{ 0, 1 } };
+var Z_CELLS_POS = [_][2]f16{ [_]f16{ -1, 0 }, [_]f16{ 0, 0 }, [_]f16{ 1, 0 }, [_]f16{ 1, 1 } };
 
 pub const Block = struct {
     const Self = @This();
@@ -39,8 +42,12 @@ pub const Block = struct {
     square_cells: [4]*Cell,
     line_cells: [5]*Cell,
     l_cells: [4]*Cell,
+
     t_cells: [4]*Cell,
+    j_cells: [4]*Cell,
+
     s_cells: [4]*Cell,
+    z_cells: [4]*Cell,
 
     R: std.rand.Xoshiro256 = undefined,
 
@@ -158,6 +165,8 @@ pub const Block = struct {
             2 => BlockType.L,
             3 => BlockType.T,
             4 => BlockType.S,
+            5 => BlockType.Z,
+            6 => BlockType.J,
             else => unreachable,
         };
 
@@ -200,6 +209,20 @@ pub const Block = struct {
             try self.createCell(),
             try self.createCell(),
         };
+
+        self.j_cells = [4]*Cell{
+            try self.createCell(),
+            try self.createCell(),
+            try self.createCell(),
+            try self.createCell(),
+        };
+
+        self.z_cells = [4]*Cell{
+            try self.createCell(),
+            try self.createCell(),
+            try self.createCell(),
+            try self.createCell(),
+        };
     }
 
     fn getShapeCells(self: *Self) []*Cell {
@@ -207,8 +230,10 @@ pub const Block = struct {
             .Square => &self.square_cells,
             .Line => &self.line_cells,
             .L => &self.l_cells,
+            .J => &self.j_cells,
             .T => &self.t_cells,
             .S => &self.s_cells,
+            .Z => &self.z_cells,
         };
     }
 
@@ -224,8 +249,10 @@ pub const Block = struct {
             .Square => SQUARE_CELLS_POS[0..SQUARE_CELLS_POS.len],
             .Line => LINE_CELLS_POS[0..LINE_CELLS_POS.len],
             .L => L_CELLS_POS[0..L_CELLS_POS.len],
+            .J => J_CELLS_POS[0..J_CELLS_POS.len],
             .T => T_CELLS_POS[0..T_CELLS_POS.len],
             .S => S_CELLS_POS[0..S_CELLS_POS.len],
+            .Z => Z_CELLS_POS[0..Z_CELLS_POS.len],
         };
     }
 
