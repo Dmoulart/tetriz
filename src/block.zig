@@ -31,7 +31,13 @@ var J_CELLS_POS = [_][2]f16{ [_]f16{ 0, -1 }, [_]f16{ 0, 0 }, [_]f16{ 0, 1 }, [_
 var T_CELLS_POS = [_][2]f16{ [_]f16{ -1, 0 }, [_]f16{ 0, 0 }, [_]f16{ 0, 1 }, [_]f16{ 1, 0 } };
 
 var S_CELLS_POS = [_][2]f16{ [_]f16{ -1, -1 }, [_]f16{ -1, 0 }, [_]f16{ 0, 0 }, [_]f16{ 0, 1 } };
-var Z_CELLS_POS = [_][2]f16{ [_]f16{ -1, 0 }, [_]f16{ 0, 0 }, [_]f16{ 1, 0 }, [_]f16{ 1, 1 } };
+// X
+// X X
+//   X
+var Z_CELLS_POS = [_][2]f16{ [_]f16{ -1, 1 }, [_]f16{ -1, 0 }, [_]f16{ 0, 0 }, [_]f16{ 0, -1 } };
+//   X
+// X X
+// X
 
 pub const Block = struct {
     const Self = @This();
@@ -156,17 +162,23 @@ pub const Block = struct {
     }
 
     pub fn pickType(self: *Self) BlockType {
-        var blocks_len = @intCast(u8, @typeInfo(BlockType).Enum.fields.len);
-        var random_block_type = self.getRandom().random().intRangeAtMost(u8, 0, blocks_len - 1);
+        // var blocks_len = @intCast(u8, @typeInfo(BlockType).Enum.fields.len);
+        var random_block_type = self.getRandom().random().intRangeAtMost(u8, 0, 4);
 
         var block_type = switch (random_block_type) {
             0 => BlockType.Square,
             1 => BlockType.Line,
-            2 => BlockType.L,
+            2 => switch (self.getRandom().random().intRangeAtMost(u8, 0, 1)) {
+                0 => BlockType.L,
+                1 => BlockType.J,
+                else => unreachable,
+            },
             3 => BlockType.T,
-            4 => BlockType.S,
-            5 => BlockType.Z,
-            6 => BlockType.J,
+            4 => switch (self.getRandom().random().intRangeAtMost(u8, 0, 1)) {
+                0 => BlockType.S,
+                1 => BlockType.Z,
+                else => unreachable,
+            },
             else => unreachable,
         };
 
