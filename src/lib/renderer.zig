@@ -17,8 +17,6 @@ pub const Renderer = struct {
 
     font: ?*c.TTF_Font = undefined,
 
-
-
     pub fn init(options: RendererOptions) !*Renderer {
         var renderer = try options.allocator.create(Renderer);
 
