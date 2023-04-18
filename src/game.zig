@@ -253,6 +253,8 @@ pub const Game = struct {
     }
 
     fn clearFilledLines(self: *Self) void {
+        var cleared_lines: u32 = 0;
+
         for (self.filled_lines) |filled, y| {
             if (!filled) continue;
 
@@ -266,7 +268,17 @@ pub const Game = struct {
 
             self.lowerAllBocksCells(y_index);
 
-            self.score += 1;
+            cleared_lines += 1;
+        }
+
+        switch (cleared_lines) {
+            0 => return,
+            1 => self.score += 40,
+            2 => self.score += 100,
+            3 => self.score += 300,
+            4 => self.score += 600,
+            5 => self.score += 1200,
+            else => self.score += 1200,
         }
     }
 
