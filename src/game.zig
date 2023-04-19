@@ -234,7 +234,7 @@ pub const Game = struct {
 
         var y: i32 = self.wallsYEnd() - 1;
 
-        yloop: while (y > self.wallsYBegin()) : (y -= 1) {
+        yloop: while (y >= self.wallsYBegin()) : (y -= 1) {
             var x: i32 = self.wallsXBegin() + 1;
             var x_index = @intCast(usize, x);
             var y_index = @intCast(usize, y);
@@ -270,16 +270,16 @@ pub const Game = struct {
 
             cleared_lines += 1;
         }
-
-        switch (cleared_lines) {
-            0 => return,
-            1 => self.score += 40,
-            2 => self.score += 100,
-            3 => self.score += 300,
-            4 => self.score += 600,
-            5 => self.score += 1200,
-            else => self.score += 1200,
-        }
+        self.score += cleared_lines;
+        // switch (cleared_lines) {
+        //     0 => return,
+        //     1 => self.score += 40,
+        //     2 => self.score += 100,
+        //     3 => self.score += 300,
+        //     4 => self.score += 600,
+        //     5 => self.score += 1200,
+        //     else => self.score += 1200,
+        // }
     }
 
     fn lowerAllBocksCells(self: *Self, from: usize) void {
