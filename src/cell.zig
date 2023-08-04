@@ -36,10 +36,10 @@ pub const Cell = struct {
         if (self.is(CELL_WALL) or self.is(CELL_BLOCK) or self.is(CELL_FLOOR)) {
             var color = self.color;
             // Extract each component using bitwise operations and masks
-            var r: u8 = @intCast(u8, (color >> 24) & 0xFF); // Extract red component
-            var g: u8 = @intCast(u8, (color >> 16) & 0xFF); // Extract green component
-            var b: u8 = @intCast(u8, (color >> 8) & 0xFF); // Extract blue component
-            var a: u8 = @intCast(u8, color & 0xFF); // Extract alpha component
+            var r: u8 = @intCast((color >> 24) & 0xFF); // Extract red component
+            var g: u8 = @intCast((color >> 16) & 0xFF); // Extract green component
+            var b: u8 = @intCast((color >> 8) & 0xFF); // Extract blue component
+            var a: u8 = @intCast(color & 0xFF); // Extract alpha component
 
             renderer.fillRect(self.x * Conf.CELL_SIZE, self.y * Conf.CELL_SIZE, Conf.CELL_SIZE, Conf.CELL_SIZE, r, g, b, a);
             renderer.strokeRect(self.x * Conf.CELL_SIZE, self.y * Conf.CELL_SIZE, Conf.CELL_SIZE, Conf.CELL_SIZE, 0, 0, 0, a);
@@ -47,8 +47,8 @@ pub const Cell = struct {
     }
 
     pub fn willIntersects(self: *Self, flag: u8, x: i32, y: i32, cells: *Cells) bool {
-        var newX = @intCast(usize, self.x + x);
-        var newY = @intCast(usize, self.y + y);
+        var newX: usize = @intCast(self.x + x);
+        var newY: usize = @intCast(self.y + y);
 
         // if (newX >= cells.len or newY >= cells[newX].len) return false;
 

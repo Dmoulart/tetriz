@@ -32,7 +32,7 @@ pub const Renderer = struct {
 
         renderer.sdl_renderer = c.SDL_CreateRenderer(renderer.sdl_window, 0, 0) orelse unreachable;
 
-        renderer.sdl_rect = c.SDL_Rect{ .x = @intCast(c_int, 0), .y = @intCast(c_int, 0), .w = 10, .h = 10 };
+        renderer.sdl_rect = c.SDL_Rect{ .x = @intCast(0), .y = @intCast(0), .w = 10, .h = 10 };
 
         renderer.font = c.TTF_OpenFont("04B_19__.ttf", 124);
 
@@ -44,11 +44,11 @@ pub const Renderer = struct {
     pub fn strokeRect(self: *Self, x: i32, y: i32, w: i32, h: i32, r: u8, g: u8, b: u8, a: u8) void {
         _ = c.SDL_SetRenderDrawColor(self.sdl_renderer, r, g, b, a);
 
-        self.sdl_rect.w = @intCast(c_int, w);
-        self.sdl_rect.h = @intCast(c_int, h);
+        self.sdl_rect.w = @intCast(w);
+        self.sdl_rect.h = @intCast(h);
 
-        self.sdl_rect.x = @intCast(c_int, x);
-        self.sdl_rect.y = @intCast(c_int, y);
+        self.sdl_rect.x = @intCast(x);
+        self.sdl_rect.y = @intCast(y);
 
         _ = c.SDL_RenderDrawRect(self.sdl_renderer, &self.sdl_rect);
     }
@@ -56,11 +56,11 @@ pub const Renderer = struct {
     pub fn fillRect(self: *Self, x: i32, y: i32, w: i32, h: i32, r: u8, g: u8, b: u8, a: u8) void {
         _ = c.SDL_SetRenderDrawColor(self.sdl_renderer, r, g, b, a);
 
-        self.sdl_rect.w = @intCast(c_int, w);
-        self.sdl_rect.h = @intCast(c_int, h);
+        self.sdl_rect.w = @intCast(w);
+        self.sdl_rect.h = @intCast(h);
 
-        self.sdl_rect.x = @intCast(c_int, x);
-        self.sdl_rect.y = @intCast(c_int, y);
+        self.sdl_rect.x = @intCast(x);
+        self.sdl_rect.y = @intCast(y);
 
         _ = c.SDL_RenderFillRect(self.sdl_renderer, &self.sdl_rect);
     }

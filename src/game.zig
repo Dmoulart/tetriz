@@ -130,8 +130,8 @@ pub const Game = struct {
 
         try self.current_block.renderProjection(&self.cells, self.renderer);
 
-        var textX = @intCast(c_int, self.wallsXEnd() + 20);
-        var textY = @intCast(c_int, self.wallsYBegin() + 20);
+        var textX: c_int = @intCast( self.wallsXEnd() + 20);
+        var textY: c_int = @intCast( self.wallsYBegin() + 20);
 
         var score_str = std.fmt.bufPrintIntToSlice(str_buffer_slice, self.score, 10, .lower, std.fmt.FormatOptions{});
         self.renderer.drawText(textX, textY, score_str);
@@ -216,8 +216,8 @@ pub const Game = struct {
 
                 const isBottomWall = y == end_y and x >= begin_x and x <= end_x;
 
-                var x_index = @intCast(usize, x);
-                var y_index = @intCast(usize, y);
+                var x_index:usize = @intCast(x);
+                var y_index:usize = @intCast(y);
 
                 if (isLeftWall or isRightWall or isBottomWall) {
                     var cell_type: u8 = if (isBottomWall) CELL_FLOOR else CELL_WALL;
@@ -236,11 +236,11 @@ pub const Game = struct {
 
         yloop: while (y >= self.wallsYBegin()) : (y -= 1) {
             var x: i32 = self.wallsXBegin() + 1;
-            var x_index = @intCast(usize, x);
-            var y_index = @intCast(usize, y);
+            var x_index: usize = @intCast(x);
+            var y_index: usize = @intCast(y);
 
             while (x <= self.wallsXEnd()) : (x += 1) {
-                x_index = @intCast(usize, x);
+                x_index = @intCast(x);
 
                 if (self.cells[x_index][y_index].type & CELL_BLOCK != CELL_BLOCK) {
                     self.filled_lines[y_index] = false;
@@ -255,14 +255,14 @@ pub const Game = struct {
     fn clearFilledLines(self: *Self) void {
         var cleared_lines: u32 = 0;
 
-        for (self.filled_lines) |filled, y| {
+        for (self.filled_lines, 0..) |filled, y| {
             if (!filled) continue;
 
             var x = self.wallsXBegin() + 1;
-            var y_index = @intCast(usize, y);
+            var y_index: usize = @intCast(y);
 
             while (x <= self.wallsXEnd()) : (x += 1) {
-                var x_index = @intCast(usize, x);
+                var x_index: usize = @intCast(x);
                 self.cells[x_index][y_index].type = CELL_NONE;
             }
 
@@ -287,11 +287,11 @@ pub const Game = struct {
 
         while (y > self.wallsYBegin()) : (y -= 1) {
             var x: i32 = self.wallsXBegin() + 1;
-            var x_index = @intCast(usize, x);
-            var y_index = @intCast(usize, y);
+            var x_index: usize = @intCast( x);
+            var y_index: usize = @intCast(y);
 
             while (x <= self.wallsXEnd()) : (x += 1) {
-                x_index = @intCast(usize, x);
+                x_index = @intCast( x);
 
                 if (self.cells[x_index][y_index].type & CELL_BLOCK == CELL_BLOCK) {
                     var color = self.cells[x_index][y_index].color;

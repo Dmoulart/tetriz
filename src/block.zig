@@ -133,8 +133,8 @@ pub const Block = struct {
 
     pub fn copyToCells(self: *Self, cells: *Cells) void {
         for (self.getShapeCells()) |cell| {
-            var x_index = @intCast(usize, cell.x);
-            var y_index = @intCast(usize, cell.y);
+            var x_index: usize = @intCast( cell.x);
+            var y_index: usize = @intCast( cell.y);
             cells[x_index][y_index].type = cell.type;
             cells[x_index][y_index].color = cell.color;
         }
@@ -273,12 +273,12 @@ pub const Block = struct {
         var cells = self.getShapeCells();
 
         if (self.type == BlockType.Square) {
-            for (positions) |vec, i| {
-                var x = vec[0];
-                var y = vec[1];
+            for (positions, 0..) |vec, i| {
+                var x:f16 = vec[0];
+                var y:f16 = vec[1];
 
-                cells[i].x = self.x + @floatToInt(i32, x);
-                cells[i].y = self.y + @floatToInt(i32, y);
+                cells[i].x = self.x + @as(i32, @intFromFloat(x));
+                cells[i].y = self.y + @as(i32, @intFromFloat(y));
             }
             return;
         }
@@ -287,7 +287,7 @@ pub const Block = struct {
         var cos = @cos(radians);
         var sin = @sin(radians);
 
-        for (positions) |vec, i| {
+        for (positions, 0..) |vec, i| {
             var cell_x = vec[0];
             var cell_y = vec[1];
 
@@ -297,13 +297,13 @@ pub const Block = struct {
             x = @round(x);
             y = @round(y);
 
-            cells[i].x = self.x + @floatToInt(i32, x);
-            cells[i].y = self.y + @floatToInt(i32, y);
+            cells[i].x = self.x + @as(i32, @intFromFloat( x));
+            cells[i].y = self.y + @as(i32, @intFromFloat(y));
         }
     }
 
     fn initRandom(self: *Self) void {
-        self.R = std.rand.DefaultPrng.init(@intCast(u64, std.time.timestamp()));
+        self.R = std.rand.DefaultPrng.init(@intCast(std.time.timestamp()));
     }
 
     fn getRandom(self: *Self) *std.rand.Xoshiro256 {

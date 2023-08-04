@@ -1,9 +1,13 @@
 const std = @import("std");
 
 pub fn build(b: *std.build.Builder) void {
-    const mode = b.standardReleaseOptions();
-    const exe = b.addExecutable("sdl-zig-demo", "src/main.zig");
-    exe.setBuildMode(mode);
+    const optimize = b.standardOptimizeOption(.{});
+    const exe = b.addExecutable(.{
+        .name = "tetriz",
+        .root_source_file = .{ .path = "src/main.zig" },
+        .optimize = optimize,
+    });
+    // exe.setBuildMode(optimize);
     exe.linkSystemLibrary("SDL2");
     exe.linkSystemLibrary("sdl2_ttf"); // Added
     exe.linkSystemLibrary("c");
@@ -12,7 +16,7 @@ pub fn build(b: *std.build.Builder) void {
     b.installArtifact(exe);
 
     const run = b.step("run", "Run the demo");
-    const run_cmd = exe.run();
+    const run_cmd = std.Build.addRunArtifact(b, exe);
     run.dependOn(&run_cmd.step);
 
     // const mode = b.standardReleaseOptions();
