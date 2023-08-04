@@ -2,11 +2,8 @@ const std = @import("std");
 
 pub fn build(b: *std.build.Builder) void {
     const mode = b.standardReleaseOptions();
-    const exe = b.addExecutable("tetriz", "src/main.zig");
+    const exe = b.addExecutable("sdl-zig-demo", "src/main.zig");
     exe.setBuildMode(mode);
-
-    exe.linkLibC();
-
     exe.linkSystemLibrary("SDL2");
     exe.linkSystemLibrary("sdl2_ttf"); // Added
     exe.linkSystemLibrary("c");
@@ -17,6 +14,24 @@ pub fn build(b: *std.build.Builder) void {
     const run = b.step("run", "Run the demo");
     const run_cmd = exe.run();
     run.dependOn(&run_cmd.step);
+
+    // const mode = b.standardReleaseOptions();
+    // const exe = b.addExecutable("tetriz", "src/main.zig");
+    // exe.setBuildMode(mode);
+
+    // exe.linkLibC();
+    // exe.linkSystemLibrary("SDL2");
+    // exe.linkSystemLibrary("sdl2_ttf"); // Added
+    // exe.linkSystemLibrary("c");
+
+    // b.default_step.dependOn(&exe.step);
+    // b.installArtifact(exe);
+
+    // const run = b.step("run", "Run the demo");
+    // const run_cmd = exe.run();
+    // run.dependOn(&run_cmd.step);
+
+    // exe.install();
 
     // // Standard target options allows the person running `zig build` to choose
     // // what target to build for. Here we do not override the defaults, which
